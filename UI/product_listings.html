@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Listing - Pro-Venture</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#f5f5f5;
+      padding:20px;
+    }
+
+    .container{
+      border:1px solid #ccc;
+      background:white;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:15px 20px;
+      border-bottom:1px solid #ddd;
+    }
+
+    .logo{
+      font-size:22px;
+      font-weight:bold;
+      color:#3a35ff;
+    }
+
+    .search-bar{
+      display:flex;
+      gap:10px;
+    }
+
+    .search-bar input{
+      padding:8px;
+      width:250px;
+      border:1px solid #ccc;
+    }
+
+    nav a{
+      margin-left:15px;
+      text-decoration:none;
+      color:#333;
+    }
+
+    .main{
+      display:flex;
+    }
+
+    .sidebar{
+      width:220px;
+      padding:20px;
+      border-right:1px solid #ddd;
+    }
+
+    .sidebar h3{
+      margin-bottom:15px;
+    }
+
+    .sidebar ul{
+      list-style:none;
+    }
+
+    .sidebar li{
+      padding:10px 0;
+      cursor:pointer;
+    }
+
+    .content{
+      flex:1;
+      padding:20px;
+    }
+
+    .content h2{
+      margin-bottom:20px;
+    }
+
+    .products{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:20px;
+    }
+
+    .card{
+      border:1px solid #ddd;
+      padding:15px;
+      text-align:center;
+      border-radius:8px;
+      background:white;
+    }
+
+    .card img{
+      width:100%;
+      height:140px;
+      object-fit:contain;
+    }
+
+    .card h4{
+      margin:10px 0;
+    }
+
+    .price{
+      color:#3a35ff;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo">Pro-Venture</div>
+
+    <div class="search-bar">
+      <select>
+        <option>All Categories</option>
+      </select>
+
+      <input type="text" placeholder="Search for products...">
+    </div>
+
+    <nav>
+      <a href="#">Sell</a>
+      <a href="#">Login</a>
+      <a href="#">Register</a>
+    </nav>
+  </header>
+
+  <div class="main">
+
+    <div class="sidebar">
+      <h3>Categories</h3>
+
+      <ul>
+        <li>All Categories</li>
+        <li>Electronics</li>
+        <li>Fashion</li>
+        <li>Home & Living</li>
+        <li>Books</li>
+        <li>Sports</li>
+        <li>Vehicles</li>
+      </ul>
+    </div>
+
+    <div class="content">
+
+      <h2>All Products</h2>
+
+      <div class="products">
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>iPhone 12 64GB</h4>
+          <p class="price">RM1699.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>Nike Air Jordan 1</h4>
+          <p class="price">RM590.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>Canon EOS 200D</h4>
+          <p class="price">RM1250.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>Gaming Chair</h4>
+          <p class="price">RM450.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>MacBook Air 2017</h4>
+          <p class="price">RM1099.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>Fossil Watch</h4>
+          <p class="price">RM350.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>PlayStation 4</h4>
+          <p class="price">RM800.00</p>
+        </div>
+
+        <div class="card">
+          <img src="https://via.placeholder.com/150" alt="">
+          <h4>Dining Table Set</h4>
+          <p class="price">RM650.00</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

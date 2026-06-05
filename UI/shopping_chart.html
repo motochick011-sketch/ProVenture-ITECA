@@ -1,0 +1,232 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro-venture Cart</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body{
+      background:#f8f8f8;
+      padding:20px;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+      background:#fff;
+      border:2px solid #6c63ff;
+      padding:15px;
+    }
+
+    .navbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+
+    .logo{
+      color:#6c63ff;
+      font-weight:bold;
+    }
+
+    .nav-links a{
+      text-decoration:none;
+      color:#555;
+      margin-left:15px;
+      font-size:14px;
+    }
+
+    .cart{
+      border:1px solid #ddd;
+      border-radius:5px;
+      overflow:hidden;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th{
+      text-align:left;
+      padding:15px;
+      background:#fafafa;
+      color:#555;
+      font-size:14px;
+    }
+
+    td{
+      padding:20px 15px;
+      border-top:1px solid #eee;
+      vertical-align:middle;
+      font-size:14px;
+    }
+
+    .product{
+      display:flex;
+      align-items:center;
+      gap:15px;
+    }
+
+    .product img{
+      width:60px;
+      height:60px;
+      object-fit:cover;
+    }
+
+    .quantity{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .quantity button{
+      width:28px;
+      height:28px;
+      border:1px solid #ddd;
+      background:white;
+      cursor:pointer;
+    }
+
+    .delete{
+      color:#888;
+      cursor:pointer;
+      margin-left:10px;
+    }
+
+    .total-section{
+      text-align:right;
+      padding:25px;
+    }
+
+    .total-label{
+      font-size:28px;
+      font-weight:bold;
+      margin-right:20px;
+    }
+
+    .total-price{
+      font-size:36px;
+      font-weight:bold;
+    }
+
+    .buttons{
+      display:flex;
+      justify-content:space-between;
+      padding:20px;
+    }
+
+    .btn{
+      padding:12px 25px;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+    }
+
+    .btn-secondary{
+      background:white;
+      border:1px solid #ccc;
+    }
+
+    .btn-primary{
+      background:#6c63ff;
+      color:white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="navbar">
+    <div class="logo">✦ Pro-Venture</div>
+
+    <div class="nav-links">
+      <a href="#">Sell</a>
+      <a href="#">Login</a>
+      <a href="#">Register</a>
+    </div>
+  </div>
+
+  <div class="cart">
+    <table>
+      <thead>
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr>
+        <td>
+          <div class="product">
+            <img src="https://via.placeholder.com/60" alt="iPhone">
+            <span><strong>iPhone 12 64GB</strong></span>
+          </div>
+        </td>
+        <td>RM1,699.00</td>
+        <td>
+          <div class="quantity">
+            <button>-</button>
+            <span>1</span>
+            <button>+</button>
+            <span class="delete">🗑</span>
+          </div>
+        </td>
+        <td>RM1,699.00</td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="product">
+            <img src="https://via.placeholder.com/60" alt="Nike">
+            <span><strong>Nike Air Jordan 1</strong></span>
+          </div>
+        </td>
+        <td>RM599.00</td>
+        <td>
+          <div class="quantity">
+            <button>-</button>
+            <span>1</span>
+            <button>+</button>
+            <span class="delete">🗑</span>
+          </div>
+        </td>
+        <td>RM599.00</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <span class="total-label">Total:</span>
+      <span class="total-price">RM2,298.00</span>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-secondary">
+        Continue Shopping
+      </button>
+
+      <button class="btn btn-primary">
+        Proceed to Checkout
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

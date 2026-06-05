@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#f5f5f5;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+
+    .login-container{
+      width:420px;
+    }
+
+    .login-box{
+      background:#fff;
+      padding:30px 25px;
+      border:1px solid #e0e0e0;
+      border-radius:4px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    h2{
+      margin-bottom:25px;
+      font-size:24px;
+      font-weight:bold;
+      color:#333;
+      text-align:center;
+    }
+
+    .tabs{
+      display:flex;
+      margin-bottom:20px;
+    }
+
+    .tabs button{
+      flex:1;
+      margin:0;
+      border-radius:0;
+      background:#ddd;
+      color:#333;
+    }
+
+    .tabs button.active{
+      background:linear-gradient(to right, #6a4cff, #7d4dff);
+      color:white;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      margin-top:15px;
+      font-size:14px;
+      color:#333;
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      border:1px solid #ddd;
+      border-radius:3px;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:#6a4cff;
+    }
+
+    .forgot-password{
+      text-align:right;
+      margin-top:8px;
+    }
+
+    .forgot-password a{
+      text-decoration:none;
+      color:#6a4cff;
+      font-size:12px;
+    }
+
+    .submit-btn{
+      width:100%;
+      margin-top:20px;
+      padding:12px;
+      border:none;
+      border-radius:3px;
+      background:linear-gradient(to right, #6a4cff, #7d4dff);
+      color:white;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .submit-btn:hover{
+      opacity:0.9;
+    }
+
+    .register{
+      text-align:center;
+      margin-top:20px;
+      font-size:13px;
+      color:#666;
+    }
+
+    .register a{
+      text-decoration:none;
+      color:#6a4cff;
+      font-weight:bold;
+    }
+
+    .hidden{
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-container">
+  <div class="login-box">
+
+    <div class="tabs">
+      <button class="active" onclick="showForm('user')" id="userBtn">
+        User Login
+      </button>
+
+      <button onclick="showForm('admin')" id="adminBtn">
+        Admin Login
+      </button>
+    </div>
+
+    <!-- User Login -->
+    <div id="userForm">
+      <h2>User Login</h2>
+
+      <form>
+        <label>Email</label>
+        <input type="email" placeholder="Enter email" required>
+
+        <label>Password</label>
+        <input type="password" placeholder="Enter password" required>
+
+        <div class="forgot-password">
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="submit-btn">Login</button>
+
+        <p class="register">
+          Don't have an account?
+          <a href="#">Register</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminForm" class="hidden">
+      <h2>Admin Login</h2>
+
+      <form>
+        <label>Admin Username</label>
+        <input type="text" placeholder="Enter admin username" required>
+
+        <label>Password</label>
+        <input type="password" placeholder="Enter admin password" required>
+
+        <button type="submit" class="submit-btn">
+          Login as Admin
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showForm(type){
+    const userForm = document.getElementById("userForm");
+    const adminForm = document.getElementById("adminForm");
+
+    const userBtn = document.getElementById("userBtn");
+    const adminBtn = document.getElementById("adminBtn");
+
+    if(type === "user"){
+      userForm.classList.remove("hidden");
+      adminForm.classList.add("hidden");
+
+      userBtn.classList.add("active");
+      adminBtn.classList.remove("active");
+    }
+    else{
+      adminForm.classList.remove("hidden");
+      userForm.classList.add("hidden");
+
+      adminBtn.classList.add("active");
+      userBtn.classList.remove("active");
+    }
+  }
+</script>
+
+</body>
+</html>
