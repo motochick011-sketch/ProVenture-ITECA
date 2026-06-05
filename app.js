@@ -5,7 +5,7 @@ async function loadScreen(screenId, queryParams = '') {
     let screenPath;
     if (screenId === 'main_screen=') {
       screenPath = "UI/main_screen.html";
-    } else if (screenId === 'products_listings_screen') {
+    } else if (screenId === 'product_listings_screen') {
       screenPath = "UI/product_listing.html";
     } else if (screenId === 'product_details_screen') {
       screenPath = "UI/product_details.html";
