@@ -7,7 +7,6 @@ async function loadScreen(screenId, queryParams = '') {
       screenPath = "UI/main_screen.html";
     } else if (screenId === 'product_listings_screen') {
       screenPath = "UI/product_listings.html";
-      await loadProductsScript();
     } else if (screenId === 'product_details_screen') {
       screenPath = "UI/product_details.html";
     }  else if (screenId === 'login_screen') {
@@ -27,6 +26,9 @@ async function loadScreen(screenId, queryParams = '') {
 
     if (screenId === 'main_screen') {
       attachMainScreenEvents();
+    }
+    else if (screenId === 'product_listings_screen') {
+      await loadProductsScript();
     } else if (screenId === 'login_screen') {
       // attachLoginScreenEvents();
     } else if (screenId === 'register_screen') {

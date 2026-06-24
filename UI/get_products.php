@@ -1,13 +1,14 @@
 ﻿<?php
-
-$pdo = require_once '../sql/db_connect.php';
+ob_start();
+$pdo = require_once __DIR__ . '/../SQL/db_connect.php';
 
 try {
-    $sql_file_path = '../sql/queries/getProducts.sql';
+  $sql_file_path = __DIR__ . '/../SQL/queries/getProducts.sql';
     if (!file_exists($sql_file_path)) {
         throw new Exception('SQL file not found: ' . $sql_file_path);
     }
     $query = file_get_contents($sql_file_path);
+    $query = ltrim($query, "\xEF\xBB\xBF");
 
     $stmt = $pdo->prepare($query);
     $stmt->execute();
