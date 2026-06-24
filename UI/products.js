@@ -11,11 +11,11 @@
     });
 
     const rawText = await response.text();
-    console.log('Raw response from get_products.php:', rawText);
+    const cleanText = rawText.replace(/^\uFEFF/, '');
+    console.log('Raw response from get_products.php:', cleanText);
 
     try {
-      const result = JSON.parse(rawText);
-      console.log('Parsed response:', result);
+      const result = JSON.parse(cleanText);
 
       if (result.success) {
         if (!window.Product || typeof window.Product.fromJSON !== 'function') {
@@ -26,17 +26,17 @@
         console.log('Products Loaded', window.state.getProducts());
 
         // Render products
-        const productList = document.querySelector('.product-list');
-        if (productList) {
-          productList.innerHTML = window.state.getProducts().map(product => `
-                        <div class="product" onclick="navigateTo('product_detail?id=${product.id}')">
-                            <img src="${product.imageUrl || 'https://via.placeholder.com/500'}" alt="${product.name}">
-                            <h3>${product.name}</h3>
-                            <p>R${parseFloat(product.price).toFixed(2)}</p>
+        const productGrid = document.querySelector('.products');
+        if (productGrid) {
+          productGrid.innerHTML = window.state.getProducts().map(product => `
+                        <div class="card" onclick="navigateTo('product_detail?id=${product.id}')">
+                            <img src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                            <h4>${product.name}</h4>
+                            <p class="price">R${parseFloat(product.price).toFixed(2)}</p>
                         </div>
                     `).join('');
         } else {
-          console.error('Product list container not found');
+          console.error('Product grid container not found');
         }
 
         return products;
