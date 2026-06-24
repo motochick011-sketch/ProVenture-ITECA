@@ -29,6 +29,7 @@ async function loadScreen(screenId, queryParams = '') {
     if (!response.ok) throw new Error('Screen not found');
     document.getElementById('screen-container').innerHTML = await response.text();
     currentScreen = screenId;
+    updateNavLinks();
 
     window.currentQueryParams = queryParams;
 
@@ -40,7 +41,7 @@ async function loadScreen(screenId, queryParams = '') {
     } else if (screenId === 'product_details_screen') {
       displayProductDetails(productId);
     } else if (screenId === 'login_screen') {
-      // attachLoginScreenEvents();
+      attachLoginScreenEvents();
     } else if (screenId === 'register_screen') {
       // attachRegisterScreenEvents();
     }
@@ -54,6 +55,36 @@ function navigateTo(screenId) {
 }
 
 window.navigateTo = navigateTo;
+
+function updateNavLinks() {
+  const navContainers = document.querySelectorAll('.nav-links, nav, .nav');
+  navContainers.forEach(nav => {
+    const user = window.state.getUser();
+    if (user) {
+      nav.innerHTML = `
+        <a href="#">Sell</a>
+        <a href="#" onclick="navigateTo('cart_screen')">Cart (${window.state.getCart().length})</a>
+        <a href="#" onclick="handleLogout()">Logout</a>
+      `;
+    } else {
+      nav.innerHTML = `
+        <a href="#">Sell</a>
+        <a href="#" onclick="navigateTo('login_screen')">Login</a>
+        <a href="#" onclick="navigateTo('register_screen')">Register</a>
+      `;
+    }
+  });
+}
+
+function handleLogout() {
+  window.state.clearUser();
+  window.state.clearCart();
+  alert('Logged out.');
+  navigateTo('main_screen');
+}
+
+window.handleLogout = handleLogout;
+window.updateNavLinks = updateNavLinks;
 
 function attachMainScreenEvents() {
   const loginButton = document.querySelector('button[onclick="navigateTo(\'login_screen\')"]');
@@ -196,3 +227,52 @@ async function loadProductsScript() {
     }
   });
 }
+
+function attachLoginScreenEvents() {
+  const userForm = document.getElementById('loginForm');
+  if (userForm) {
+    userForm.onsubmit = function(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+
+      const validEmail = 'jadeclegg11@gmail.com';
+      const validPassword = '12345';
+
+      if (email === validEmail && password === validPassword) {
+        window.state.setUser({
+          id: 1,
+          userName: 'Jade',
+          email: 'jadeclegg11@gmail.com',
+          role: 1
+        });
+        errorEl.style.display = 'none';
+        alert('Login Successful!');
+        navigateTo('main_screen');
+      } else {
+        errorEl.textContent = 'Invalid email or password.';
+        errorEl.style.display = 'block';
+      }
+    };
+  }
+}
+
+window.showForm = function(type) {
+  const userForm = document.getElementById("userForm");
+  const adminForm = document.getElementById("adminForm");
+  const userBtn = document.getElementById("userBtn");
+  const adminBtn = document.getElementById("adminBtn");
+
+  if (type === "user") {
+    userForm.classList.remove("hidden");
+    adminForm.classList.add("hidden");
+    userBtn.classList.add("active");
+    adminBtn.classList.remove("active");
+  } else {
+    adminForm.classList.remove("hidden");
+    userForm.classList.add("hidden");
+    adminBtn.classList.add("active");
+    userBtn.classList.remove("active");
+  }
+};
