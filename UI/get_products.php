@@ -1,9 +1,9 @@
 ﻿<?php
 
-$pdo = require_once '../../sql/db_connect.php';
+$pdo = require_once '../sql/db_connect.php';
 
 try {
-    $sql_file_path = '../../sql/queries/getProducts.sql';
+    $sql_file_path = '../sql/queries/getProducts.sql';
     if (!file_exists($sql_file_path)) {
         throw new Exception('SQL file not found: ' . $sql_file_path);
     }
