@@ -26,18 +26,7 @@
         console.log('Products Loaded', window.state.getProducts());
 
         // Render products
-        const productGrid = document.querySelector('.products');
-        if (productGrid) {
-          productGrid.innerHTML = window.state.getProducts().map(product => `
-                        <div class="card" onclick="navigateTo('product_detail?id=${product.id}')">
-                            <img src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                            <h4>${product.name}</h4>
-                            <p class="price">R${parseFloat(product.price).toFixed(2)}</p>
-                        </div>
-                    `).join('');
-        } else {
-          console.error('Product grid container not found');
-        }
+        renderProducts(window.state.getProducts());
 
         return products;
       } else {
@@ -54,3 +43,40 @@
 }
 
 window.loadProducts = loadProducts;
+
+function renderProducts(products) {
+  const productGrid = document.querySelector('.products');
+  if (productGrid) {
+    productGrid.innerHTML = products.map(product => `
+                <div class="card" onclick="navigateTo('product_detail?id=${product.id}')">
+                    <img src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    <p class="price">R${parseFloat(product.price).toFixed(2)}</p>
+                </div>
+            `).join('');
+  }
+}
+
+function filterByCategory(categoryId) {
+  const allProducts = window.state.getProducts();
+  let filtered;
+
+  if (categoryId === 0) {
+    filtered = allProducts;
+  } else {
+    filtered = allProducts.filter(product => product.categoryId === categoryId);
+  }
+
+  renderProducts(filtered);
+
+  // Update active state in sidebar
+  const items = document.querySelectorAll('.sidebar li');
+  items.forEach(item => {
+    item.classList.remove('active');
+    if (parseInt(item.getAttribute('data-category-id')) === categoryId) {
+      item.classList.add('active');
+    }
+  });
+}
+
+window.filterByCategory = filterByCategory;
