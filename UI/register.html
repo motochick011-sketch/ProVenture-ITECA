@@ -2,132 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<style>
-
-  *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-  }
-
-  body{
-    background:#f5f5f5;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-  }
-
-  .register-container{
-    width:400px;
-  }
-
-  .register-box{
-    background:#fff;
-    padding:30px;
-    border:1px solid #e5e5e5;
-    border-radius:4px;
-    box-shadow:0 1px 3px rgba(0,0,0,0.1);
-  }
-
-  h2{
-    margin-bottom:20px;
-    color:#333;
-    font-size:24px;
-  }
-
-  label{
-    display:block;
-    margin-bottom:8px;
-    margin-top:15px;
-    font-size:13px;
-    font-weight:600;
-    color:#444;
-  }
-
-  input{
-    width:100%;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:3px;
-    outline:none;
-  }
-
-  input:focus{
-    border-color:#6c4df6;
-  }
-
-  button{
-    width:100%;
-    margin-top:20px;
-    padding:12px;
-    border:none;
-    border-radius:3px;
-    background:linear-gradient(to right,#6c4df6,#5d3ff2);
-    color:white;
-    font-weight:600;
-    cursor:pointer;
-  }
-
-  button:hover{
-    opacity:0.9;
-  }
-
-  .login-link{
-    text-align:center;
-    margin-top:20px;
-    font-size:13px;
-    color:#666;
-  }
-
-  .login-link a{
-    text-decoration:none;
-    color:#6c4df6;
-    font-weight:bold;
-  }
-
-</style>
-<body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    .register-wrapper{
+      background:#f5f5f5;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .home-btn{
+      align-self:flex-start;
+      margin-bottom:20px;
+      padding:8px 16px;
+      background:#6c4df6;
+      color:white;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:bold;
+    }
+
+    .home-btn:hover{
+      opacity:0.9;
+    }
+
+    .register-container{
+      width:400px;
+    }
+
+    .register-box{
+      background:#fff;
+      padding:30px;
+      border:1px solid #e5e5e5;
+      border-radius:4px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    h2{
+      margin-bottom:20px;
+      color:#333;
+      font-size:24px;
+      text-align:center;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      margin-top:15px;
+      font-size:13px;
+      font-weight:600;
+      color:#444;
+    }
+
+    input{
+      width:100%;
+      padding:10px;
+      border:1px solid #ddd;
+      border-radius:3px;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:#6c4df6;
+    }
+
+    .submit-btn{
+      width:100%;
+      margin-top:20px;
+      padding:12px;
+      border:none;
+      border-radius:3px;
+      background:linear-gradient(to right,#6c4df6,#5d3ff2);
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .submit-btn:hover{
+      opacity:0.9;
+    }
+
+    .login-link{
+      text-align:center;
+      margin-top:20px;
+      font-size:13px;
+      color:#666;
+    }
+
+    .login-link a{
+      text-decoration:none;
+      color:#6c4df6;
+      font-weight:bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="register-container">
-  <div class="register-box">
-    <h2>Register</h2>
+<div class="register-wrapper">
+  <button class="home-btn" onclick="navigateTo('main_screen')">← Home</button>
 
-    <form>
-      <label for="fullname">Full Name</label>
-      <input type="text" id="fullname" placeholder="Enter full name">
+  <div class="register-container">
+    <div class="register-box">
+      <h2>Register</h2>
 
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Enter email">
+      <form>
+        <label for="fullname">Full Name</label>
+        <input type="text" id="fullname" placeholder="Enter full name">
 
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter email">
 
-      <button type="submit">Register</button>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
 
-      <p class="login-link">
-        Already have an account?
-        <a href="#" onclick="navigateTo('login_screen')">Login</a>
-        |
-        <a href="#" onclick="navigateTo('main_screen')">Home</a>
-      </p>
-    </form>
+        <button type="submit" class="submit-btn">Register</button>
+
+        <p class="login-link">
+          Already have an account?
+          <a href="#" onclick="navigateTo('login_screen')">Login</a>
+        </p>
+      </form>
+    </div>
   </div>
 </div>
 
-</body>
-</html>
 </body>
 </html>

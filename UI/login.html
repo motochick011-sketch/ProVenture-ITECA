@@ -13,12 +13,31 @@
       font-family:Arial, Helvetica, sans-serif;
     }
 
-    body{
+    .login-wrapper{
       background:#f5f5f5;
       display:flex;
+      flex-direction:column;
       justify-content:center;
       align-items:center;
-      height:100vh;
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .home-btn{
+      align-self:flex-start;
+      margin-bottom:20px;
+      padding:8px 16px;
+      background:#6a4cff;
+      color:white;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:bold;
+    }
+
+    .home-btn:hover{
+      opacity:0.9;
     }
 
     .login-container{
@@ -127,62 +146,66 @@
 
 <body>
 
-<div class="login-container">
-  <div class="login-box">
+<div class="login-wrapper">
+  <button class="home-btn" onclick="navigateTo('main_screen')">← Home</button>
 
-    <div class="tabs">
-      <button class="active" onclick="showForm('user')" id="userBtn">
-        User Login
-      </button>
+  <div class="login-container">
+    <div class="login-box">
 
-      <button onclick="showForm('admin')" id="adminBtn">
-        Admin Login
-      </button>
-    </div>
-
-    <!-- User Login -->
-    <div id="userForm">
-      <h2>User Login</h2>
-
-      <form onsubmit="handleLogin(event)">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="Enter email" required>
-
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="Enter password" required>
-
-        <p id="loginError" style="color:red;font-size:13px;margin-top:10px;display:none;"></p>
-
-        <div class="forgot-password">
-          <a href="#">Forgot password?</a>
-        </div>
-
-        <button type="submit" class="submit-btn">Login</button>
-
-        <p class="register">
-          Don't have an account?
-          <a href="#" onclick="navigateTo('register_screen')">Register</a>
-        </p>
-      </form>
-    </div>
-
-    <!-- Admin Login -->
-    <div id="adminForm" class="hidden">
-      <h2>Admin Login</h2>
-
-      <form>
-        <label>Admin Username</label>
-        <input type="text" placeholder="Enter admin username" required>
-
-        <label>Password</label>
-        <input type="password" placeholder="Enter admin password" required>
-
-        <button type="submit" class="submit-btn">
-          Login as Admin
+      <div class="tabs">
+        <button class="active" onclick="showForm('user')" id="userBtn">
+          User Login
         </button>
-      </form>
-    </div>
 
+        <button onclick="showForm('admin')" id="adminBtn">
+          Admin Login
+        </button>
+      </div>
+
+      <!-- User Login -->
+      <div id="userForm">
+        <h2>User Login</h2>
+
+        <form onsubmit="handleLogin(event)">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="Enter email" required>
+
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter password" required>
+
+          <p id="loginError" style="color:red;font-size:13px;margin-top:10px;display:none;"></p>
+
+          <div class="forgot-password">
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="submit-btn">Login</button>
+
+          <p class="register">
+            Don't have an account?
+            <a href="#" onclick="navigateTo('register_screen')">Register</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- Admin Login -->
+      <div id="adminForm" class="hidden">
+        <h2>Admin Login</h2>
+
+        <form>
+          <label>Admin Username</label>
+          <input type="text" placeholder="Enter admin username" required>
+
+          <label>Password</label>
+          <input type="password" placeholder="Enter admin password" required>
+
+          <button type="submit" class="submit-btn">
+            Login as Admin
+          </button>
+        </form>
+      </div>
+
+    </div>
   </div>
 </div>
 

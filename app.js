@@ -99,7 +99,7 @@ function displayProductDetails(productId) {
 
   const breadcrumb = document.querySelector('.breadcrumb');
   if (breadcrumb) {
-    breadcrumb.innerHTML = `Home / ${category} / <strong>${product.name}</strong>`;
+    breadcrumb.innerHTML = `<button class="btn back-btn" onclick="navigateTo('product_listings_screen')">← Back</button> Home / ${category} / <strong>${product.name}</strong>`;
   }
 
   const imageBox = document.querySelector('.image-box img');
