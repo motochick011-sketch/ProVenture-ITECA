@@ -190,14 +190,14 @@
 
       <!-- Admin Login -->
       <div id="adminForm" class="hidden">
-        <h2>Admin Login</h2>
-
-        <form>
+        <form id="adminLoginForm">
           <label>Admin Username</label>
-          <input type="text" placeholder="Enter admin username" required>
+          <input type="text" id="adminUsername" placeholder="Enter admin username" required>
 
           <label>Password</label>
-          <input type="password" placeholder="Enter admin password" required>
+          <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+
+          <p id="adminLoginError" style="color:red;font-size:13px;margin-top:10px;display:none;"></p>
 
           <button type="submit" class="submit-btn">
             Login as Admin
@@ -230,32 +230,6 @@
 
       adminBtn.classList.add("active");
       userBtn.classList.remove("active");
-    }
-  }
-
-  function handleLogin(event) {
-    event.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorEl = document.getElementById('loginError');
-
-    // Hardcoded user credentials
-    const validEmail = 'jadeclegg11@gmail.com';
-    const validPassword = '12345';
-
-    if (email === validEmail && password === validPassword) {
-      window.state.setUser({
-        id: 1,
-        userName: 'Jade',
-        email: 'jadeclegg11@gmail.com',
-        role: 1
-      });
-      errorEl.style.display = 'none';
-      alert('Login Successful!');
-      navigateTo('main_screen');
-    } else {
-      errorEl.textContent = 'Invalid email or password.';
-      errorEl.style.display = 'block';
     }
   }
 </script>
