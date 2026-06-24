@@ -21,6 +21,8 @@ async function loadScreen(screenId, queryParams = '') {
       screenPath = "UI/login.html";
     }  else if (screenId === 'register_screen') {
       screenPath = "UI/register.html";
+    } else if (screenId === 'cart_screen') {
+      screenPath = "UI/shopping_chart.html";
     } else {
       screenPath = "UI/main_screen.html";
     }
@@ -42,6 +44,8 @@ async function loadScreen(screenId, queryParams = '') {
       displayProductDetails(productId);
     } else if (screenId === 'login_screen') {
       attachLoginScreenEvents();
+    } else if (screenId === 'cart_screen') {
+      displayCart();
     } else if (screenId === 'register_screen') {
       // attachRegisterScreenEvents();
     }
@@ -276,3 +280,59 @@ window.showForm = function(type) {
     userBtn.classList.remove("active");
   }
 };
+function displayCart() {
+  const cart = window.state.getCart();
+  const tbody = document.querySelector('.cart tbody');
+  const totalEl = document.querySelector('.total-price');
+  const continueBtn = document.querySelector('.btn-secondary');
+
+  if (continueBtn) {
+    continueBtn.onclick = () => navigateTo('product_listings_screen');
+  }
+
+  if (!tbody) return;
+
+  if (cart.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;">Your cart is empty</td></tr>';
+    if (totalEl) totalEl.textContent = 'R0.00';
+    return;
+  }
+
+  let total = 0;
+  tbody.innerHTML = cart.map((item, index) => {
+    const price = parseFloat(item.price);
+    total += price;
+    return `
+      <tr>
+        <td>
+          <div class="product">
+            <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
+            <span><strong>${item.name}</strong></span>
+          </div>
+        </td>
+        <td>R${price.toFixed(2)}</td>
+        <td>
+          <div class="quantity">
+            <span>1</span>
+            <span class="delete" onclick="removeFromCart(${index})">🗑️</span>
+          </div>
+        </td>
+        <td>R${price.toFixed(2)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  if (totalEl) totalEl.textContent = 'R' + total.toFixed(2);
+}
+
+function removeFromCart(index) {
+  const cart = window.state.getCart();
+  cart.splice(index, 1);
+  sessionStorage.setItem('cart', JSON.stringify(cart));
+  window.state.cart = cart;
+  displayCart();
+  updateNavLinks();
+}
+
+window.displayCart = displayCart;
+window.removeFromCart = removeFromCart;
