@@ -144,12 +144,14 @@
     <div id="userForm">
       <h2>User Login</h2>
 
-      <form>
+      <form onsubmit="handleLogin(event)">
         <label>Email</label>
-        <input type="email" placeholder="Enter email" required>
+        <input type="email" id="loginEmail" placeholder="Enter email" required>
 
         <label>Password</label>
-        <input type="password" placeholder="Enter password" required>
+        <input type="password" id="loginPassword" placeholder="Enter password" required>
+
+        <p id="loginError" style="color:red;font-size:13px;margin-top:10px;display:none;"></p>
 
         <div class="forgot-password">
           <a href="#">Forgot password?</a>
@@ -159,7 +161,7 @@
 
         <p class="register">
           Don't have an account?
-          <a href="#">Register</a>
+          <a href="#" onclick="navigateTo('register_screen')">Register</a>
         </p>
       </form>
     </div>
@@ -205,6 +207,32 @@
 
       adminBtn.classList.add("active");
       userBtn.classList.remove("active");
+    }
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+
+    // Hardcoded user credentials
+    const validEmail = 'jadeclegg11@gmail.com';
+    const validPassword = '12345';
+
+    if (email === validEmail && password === validPassword) {
+      window.state.setUser({
+        id: 1,
+        userName: 'Jade',
+        email: 'jadeclegg11@gmail.com',
+        role: 1
+      });
+      errorEl.style.display = 'none';
+      alert('Login Successful!');
+      navigateTo('main_screen');
+    } else {
+      errorEl.textContent = 'Invalid email or password.';
+      errorEl.style.display = 'block';
     }
   }
 </script>

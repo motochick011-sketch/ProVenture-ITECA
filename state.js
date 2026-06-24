@@ -1,6 +1,7 @@
 ﻿window.state = {
   user: null,
   products: [],
+  cart: [],
 
   init() {
     const storedUser = sessionStorage.getItem('user');
@@ -11,6 +12,10 @@
     if (storedProducts) {
       this.products = JSON.parse(storedProducts).map(data => window.Product.fromJSON(data));
     }
+    const storedCart = sessionStorage.getItem('cart');
+    if (storedCart) {
+      this.cart = JSON.parse(storedCart);
+    }
   },
 
   setUser(user) {
@@ -20,7 +25,7 @@
         user.userName || null,
         user.email||  null,
         user.role ||null
-    );
+      );
       sessionStorage.setItem('user', JSON.stringify(this.user.toJSON()));
     } else {
       throw new Error('Invalid user object');
@@ -47,6 +52,20 @@
 
   getProducts() {
     return this.products;
+  },
+
+  addToCart(product) {
+    this.cart.push(product.toJSON ? product.toJSON() : product);
+    sessionStorage.setItem('cart', JSON.stringify(this.cart));
+  },
+
+  getCart() {
+    return this.cart;
+  },
+
+  clearCart() {
+    this.cart = [];
+    sessionStorage.removeItem('cart');
   }
 };
 

@@ -64,6 +64,16 @@
       padding:20px;
       font-size:14px;
       color:#666;
+      display:flex;
+      align-items:center;
+      gap:15px;
+    }
+
+    .back-btn{
+      background:#4b3cff;
+      color:white;
+      font-size:13px;
+      padding:8px 16px;
     }
 
     .main{
@@ -169,6 +179,7 @@
   </header>
 
   <div class="breadcrumb">
+    <button class="btn back-btn" onclick="navigateTo('product_listings_screen')">← Back</button>
     Home / Electronics / <strong>iPhone 12 64GB</strong>
   </div>
 
@@ -202,8 +213,7 @@
       </div>
 
       <div class="buttons">
-        <button class="btn chat">Chat with Seller</button>
-        <button class="btn cart">Add to Cart</button>
+        <button class="btn cart" onclick="addToCart()">Add to Cart</button>
       </div>
 
     </div>

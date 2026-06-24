@@ -3,6 +3,14 @@ let currentScreen = 'main_screen';
 async function loadScreen(screenId, queryParams = '') {
   try {
     let screenPath;
+    let productId = null;
+
+    // Handle product_detail?id=X format
+    if (screenId.startsWith('product_detail?id=')) {
+      productId = screenId.split('id=')[1];
+      screenId = 'product_details_screen';
+    }
+
     if (screenId === 'main_screen=') {
       screenPath = "UI/main_screen.html";
     } else if (screenId === 'product_listings_screen') {
@@ -29,12 +37,12 @@ async function loadScreen(screenId, queryParams = '') {
     }
     else if (screenId === 'product_listings_screen') {
       await loadProductsScript();
+    } else if (screenId === 'product_details_screen') {
+      displayProductDetails(productId);
     } else if (screenId === 'login_screen') {
       // attachLoginScreenEvents();
     } else if (screenId === 'register_screen') {
       // attachRegisterScreenEvents();
-    } else if (screenId === 'product_detail') {
-      // attachProductDetailsEvents();
     }
   } catch (error) {
     console.error('Error loading screen:', error);
@@ -66,6 +74,96 @@ function attachMainScreenEvents() {
   });
 }
 loadScreen('main_screen');
+
+const categoryMap = {
+  1: 'Electronics',
+  2: 'Fashion',
+  3: 'Home & Living',
+  4: 'Books',
+  5: 'Sports',
+  6: 'Vehicles'
+};
+
+function displayProductDetails(productId) {
+  const products = window.state.getProducts();
+  const product = products.find(p => p.id == productId);
+
+  if (!product) {
+    document.getElementById('screen-container').innerHTML = '<p>Product not found</p>';
+    return;
+  }
+
+  window.currentProductId = productId;
+
+  const category = categoryMap[product.categoryId] || 'Unknown';
+
+  const breadcrumb = document.querySelector('.breadcrumb');
+  if (breadcrumb) {
+    breadcrumb.innerHTML = `Home / ${category} / <strong>${product.name}</strong>`;
+  }
+
+  const imageBox = document.querySelector('.image-box img');
+  if (imageBox) {
+    imageBox.src = product.image || 'https://via.placeholder.com/220x300';
+    imageBox.alt = product.name;
+  }
+
+  const title = document.querySelector('.details h1');
+  if (title) {
+    title.textContent = product.name;
+  }
+
+  const price = document.querySelector('.details .price');
+  if (price) {
+    price.textContent = 'R' + parseFloat(product.price).toFixed(2);
+  }
+
+  const description = document.querySelector('.details .description');
+  if (description) {
+    description.innerHTML = `<strong>Description:</strong><br><br>${product.description || 'No description available.'}`;
+  }
+
+  const info = document.querySelectorAll('.details .info');
+  if (info.length > 0) {
+    info[0].innerHTML = `<strong>Category:</strong> ${category}`;
+  }
+  if (info.length > 1) {
+    info[1].innerHTML = `<strong>Status:</strong> ${product.status || 'N/A'}`;
+  }
+  if (info.length > 2) {
+    info[2].innerHTML = `<strong>Listed:</strong> ${product.createAt || 'N/A'}`;
+  }
+
+  // Disable Add to Cart if not logged in
+  const cartBtn = document.querySelector('.btn.cart');
+  if (cartBtn && !window.state.getUser()) {
+    cartBtn.disabled = true;
+    cartBtn.style.opacity = '0.5';
+    cartBtn.style.cursor = 'not-allowed';
+    cartBtn.title = 'Please log in to add items to cart';
+  }
+}
+
+window.displayProductDetails = displayProductDetails;
+
+function addToCart() {
+  if (!window.state.getUser()) {
+    alert('Please log in to add items to your cart.');
+    return;
+  }
+
+  const productId = window.currentProductId;
+  const products = window.state.getProducts();
+  const product = products.find(p => p.id == productId);
+
+  if (product) {
+    window.state.addToCart(product);
+    alert(product.name + ' added to cart!');
+    console.log('Cart:', window.state.getCart());
+  }
+}
+
+window.addToCart = addToCart;
 
 async function loadProductsScript() {
   return new Promise(async (resolve, reject) => {
