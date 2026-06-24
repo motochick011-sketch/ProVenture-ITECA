@@ -50,6 +50,7 @@ async function loadScreen(screenId, queryParams = '') {
       displayCart();
     } else if (screenId === 'admin_dashboard_screen') {
       attachAdminDashboardEvents();
+      showAdminDashboard();
     } else if (screenId === 'register_screen') {
       // attachRegisterScreenEvents();
     }
@@ -421,7 +422,7 @@ function showAdminDashboard() {
       <div class="card orders">
         <i class="fas fa-clipboard-list"></i>
         <div>
-          <div class="card-number">85</div>
+          <div class="card-number">4</div>
           <div class="card-text">Orders</div>
         </div>
       </div>
@@ -440,10 +441,10 @@ function showAdminDashboard() {
         <tr><th>Order ID</th><th>User</th><th>Total</th><th>Status</th></tr>
       </thead>
       <tbody>
-        <tr><td>#1001</td><td>John Doe</td><td>R1,000.00</td><td><span class="status completed">Completed</span></td></tr>
-        <tr><td>#1002</td><td>Jane Smith</td><td>R950.00</td><td><span class="status processing">Processing</span></td></tr>
-        <tr><td>#1003</td><td>Alex Lee</td><td>R1,250.00</td><td><span class="status pending">Pending</span></td></tr>
-        <tr><td>#1004</td><td>Maria Tan</td><td>R650.00</td><td><span class="status completed">Completed</span></td></tr>
+        <tr><td>#1001</td><td>Jade Clegg</td><td>R1,000.00</td><td><span class="status completed">Completed</span></td></tr>
+        <tr><td>#1002</td><td>Jade Clegg</td><td>R950.00</td><td><span class="status processing">Processing</span></td></tr>
+        <tr><td>#1003</td><td>Jade Clegg</td><td>R1,250.00</td><td><span class="status pending">Pending</span></td></tr>
+        <tr><td>#1004</td><td>Ivan Zaltsman</td><td>R650.00</td><td><span class="status completed">Completed</span></td></tr>
       </tbody>
     </table>
   `;
@@ -488,6 +489,7 @@ function showAdminUsers() {
       <tbody>
         <tr><td>1</td><td>Jade</td><td>jadeclegg11@gmail.com</td><td>User</td></tr>
         <tr><td>99</td><td>Admin</td><td>admin@proventure.com</td><td>Admin</td></tr>
+        <tr><td>1</td><td>Ivan</td><td>ivanzaltsman@gmail.com</td><td>User</td></tr>
       </tbody>
     </table>
   `;
