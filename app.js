@@ -6,7 +6,8 @@ async function loadScreen(screenId, queryParams = '') {
     if (screenId === 'main_screen=') {
       screenPath = "UI/main_screen.html";
     } else if (screenId === 'product_listings_screen') {
-      screenPath = "UI/product_listing.html";
+      screenPath = "UI/product_listings.html";
+      await loadProductsScript();
     } else if (screenId === 'product_details_screen') {
       screenPath = "UI/product_details.html";
     }  else if (screenId === 'login_screen') {
@@ -39,9 +40,7 @@ async function loadScreen(screenId, queryParams = '') {
   }
 }
 function navigateTo(screenId) {
-  const [baseScreen, queryString] = screenId.split('?');
-  const queryParams = queryString ? `?${queryString}` : '';
-  loadScreen(baseScreen, queryParams);
+  loadScreen(screenId);
 }
 
 window.navigateTo = navigateTo;
@@ -66,3 +65,34 @@ function attachMainScreenEvents() {
 }
 loadScreen('main_screen');
 
+async function loadProductsScript() {
+  return new Promise(async (resolve, reject) => {
+    if (typeof window.loadProducts === 'function') {
+      window.loadProducts().then(resolve).catch(reject);
+      return;
+    }
+
+    const dependencies = [
+      '/state.js',
+      '/models/product.js',
+      'UI/products.js'
+    ];
+
+    for (const src of dependencies) {
+      await new Promise((depResolve, depReject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = depResolve;
+        script.onerror = () => depReject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    if (typeof window.loadProducts === 'function') {
+      window.loadProducts().then(resolve).catch(reject);
+    } else {
+      reject(new Error('loadProducts function not found in products.js'));
+    }
+  });
+}
