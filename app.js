@@ -48,6 +48,7 @@ async function loadScreen(screenId, queryParams = '') {
     }
     else if (screenId === 'product_listings_screen') {
       await loadProductsScript();
+      if (typeof loadSidebarCategories === 'function') loadSidebarCategories();
       // Apply category filter if navigated from homepage category
       if (window.pendingCategoryFilter) {
         filterByCategory(window.pendingCategoryFilter);
@@ -823,7 +824,20 @@ async function showAdminCategories() {
           <h3 style="margin-bottom:10px;">Add Category</h3>
           <div style="margin-bottom:8px;"><label style="font-size:13px;">Name</label><input type="text" id="newCatName" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;"></div>
           <div style="margin-bottom:8px;"><label style="font-size:13px;">Description</label><input type="text" id="newCatDesc" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;"></div>
-          <div style="margin-bottom:8px;"><label style="font-size:13px;">Icon URL</label><input type="text" id="newCatIcon" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;" placeholder="https://cdn-icons-png.flaticon.com/..."></div>
+          <div style="margin-bottom:8px;"><label style="font-size:13px;">Icon</label><select id="newCatIcon" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;">
+            <option value="laptop">💻 Electronics</option>
+            <option value="shirt">👕 Fashion</option>
+            <option value="house">🏠 Home</option>
+            <option value="book">📚 Books</option>
+            <option value="futbol">⚽ Sports</option>
+            <option value="car">🚗 Vehicles</option>
+            <option value="music">🎵 Music</option>
+            <option value="gamepad">🎮 Gaming</option>
+            <option value="utensils">🍴 Food</option>
+            <option value="paw">🐾 Pets</option>
+            <option value="heart">❤️ Health</option>
+            <option value="tag">🏷️ Other</option>
+          </select></div>
           <button onclick="submitNewCategory()" style="background:#27ae60;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Save</button>
           <button onclick="document.getElementById('addCategoryForm').style.display='none'" style="background:#999;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin-left:5px;">Cancel</button>
         </div>
@@ -996,6 +1010,19 @@ async function loadSellerProducts() {
     navigateTo('login_screen');
     return;
   }
+
+  // Load categories into the select dropdown
+  try {
+    const catResp = await fetch('UI/get_categories.php');
+    const catRaw = await catResp.text();
+    const catResult = JSON.parse(catRaw.replace(/^\uFEFF/, ''));
+    if (catResult.success) {
+      const catSelect = document.getElementById('spCategory');
+      if (catSelect) {
+        catSelect.innerHTML = catResult.categories.map(c => `<option value="${c.id}">${c.categoryName}</option>`).join('');
+      }
+    }
+  } catch (e) {}
 
   const tbody = document.getElementById('sellerProductsBody');
   if (!tbody) return;

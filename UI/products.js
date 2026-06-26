@@ -44,6 +44,26 @@
 
 window.loadProducts = loadProducts;
 
+async function loadSidebarCategories() {
+  const sidebar = document.getElementById('categorySidebar');
+  if (!sidebar) return;
+
+  try {
+    const response = await fetch('UI/get_categories.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      sidebar.innerHTML = '<li data-category-id="0" onclick="filterByCategory(0)">All Categories</li>' +
+        result.categories.map(c => `<li data-category-id="${c.id}" onclick="filterByCategory(${c.id})">${c.categoryName}</li>`).join('');
+    }
+  } catch (e) {
+    console.error('Error loading categories:', e);
+  }
+}
+
+window.loadSidebarCategories = loadSidebarCategories;
+
 function renderProducts(products) {
   const productGrid = document.querySelector('.products');
   if (productGrid) {
@@ -64,7 +84,7 @@ function filterByCategory(categoryId) {
   if (categoryId === 0) {
     filtered = allProducts;
   } else {
-    filtered = allProducts.filter(product => product.categoryId === categoryId);
+    filtered = allProducts.filter(product => product.categoryId == categoryId);
   }
 
   renderProducts(filtered);
