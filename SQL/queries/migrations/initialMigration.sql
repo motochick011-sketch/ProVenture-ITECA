@@ -22,7 +22,9 @@ create table almsafpa_eduvosprojd.category
 (
     id           int auto_increment primary key,
     categoryName char(50)  not null,
-    description  char(120) not null
+    description  char(120) not null,
+    icon         varchar(100) default '' not null,
+    isDeleted    tinyint default 0 not null
 );
 
 create table almsafpa_eduvosprojd.products
@@ -36,6 +38,7 @@ create table almsafpa_eduvosprojd.products
     status      char(20)                              not null,
     createAt    timestamp default current_timestamp() not null on update current_timestamp(),
     image       varchar(255)                          null,
+    isDeleted   tinyint default 0                     not null,
     constraint fk_products_seller foreign key (sellerId) references almsafpa_eduvosprojd.user (userId),
     constraint fk_products_category foreign key (categoryId) references almsafpa_eduvosprojd.category (id)
 );

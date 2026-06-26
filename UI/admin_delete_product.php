@@ -13,7 +13,7 @@ if ($productId === null) {
 }
 
 try {
-    $sql = ltrim(file_get_contents(__DIR__ . '/../SQL/queries/product/deleteProduct.sql'), "\xEF\xBB\xBF");
+    $sql = ltrim(file_get_contents(__DIR__ . '/../SQL/queries/product/softDeleteProduct.sql'), "\xEF\xBB\xBF");
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$productId]);
 

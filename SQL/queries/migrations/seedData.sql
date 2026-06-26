@@ -4,7 +4,8 @@
 -- Roles
 INSERT INTO almsafpa_eduvosprojd.role (id, roleName, roleDescription) VALUES
 (1, 'user', 'default user'),
-(2, 'admin', 'admin user');
+(2, 'admin', 'admin user'),
+(3, 'seller', 'seller user');
 
 -- Users
 INSERT INTO almsafpa_eduvosprojd.user (userId, name, email, password, roleId, isDisabled) VALUES
@@ -12,13 +13,13 @@ INSERT INTO almsafpa_eduvosprojd.user (userId, name, email, password, roleId, is
 (2, 'ivan', 'ivanzaltsman@gmail.com', '54321', 1, 0);
 
 -- Categories
-INSERT INTO almsafpa_eduvosprojd.category (id, categoryName, description) VALUES
-(1, 'Electronics', 'this is electronics'),
-(2, 'Fashion', 'this is fashion'),
-(3, 'Home & Living', 'this is home & living'),
-(4, 'Books', 'this is books'),
-(5, 'Sports', 'this is sports'),
-(6, 'Vehicles', 'this is vehicles');
+INSERT INTO almsafpa_eduvosprojd.category (id, categoryName, description, icon) VALUES
+(1, 'Electronics', 'this is electronics', 'https://cdn-icons-png.flaticon.com/512/1041/1041916.png'),
+(2, 'Fashion', 'this is fashion', 'https://cdn-icons-png.flaticon.com/512/892/892458.png'),
+(3, 'Home & Living', 'this is home & living', 'https://cdn-icons-png.flaticon.com/512/619/619034.png'),
+(4, 'Books', 'this is books', 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png'),
+(5, 'Sports', 'this is sports', 'https://cdn-icons-png.flaticon.com/512/861/861512.png'),
+(6, 'Vehicles', 'this is vehicles', 'https://cdn-icons-png.flaticon.com/512/744/744465.png');
 
 -- Products
 INSERT INTO almsafpa_eduvosprojd.products (id, sellerId, categoryId, name, description, price, status, image) VALUES

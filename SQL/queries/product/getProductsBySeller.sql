@@ -1,2 +1,2 @@
 SELECT * FROM almsafpa_eduvosprojd.products
-WHERE sellerId = ?;
+WHERE sellerId = ? AND isDeleted = 0;

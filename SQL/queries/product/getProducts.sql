@@ -1,1 +1,2 @@
-﻿SELECT * FROM almsafpa_eduvosprojd.products;
+﻿SELECT * FROM almsafpa_eduvosprojd.products
+WHERE isDeleted = 0;

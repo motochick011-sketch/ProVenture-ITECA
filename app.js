@@ -78,14 +78,14 @@ function updateNavLinks() {
   navContainers.forEach(nav => {
     const user = window.state.getUser();
     if (user) {
+      const isSeller = user.role == 2 || user.role == 3;
       nav.innerHTML = `
-        <a href="#" onclick="navigateTo('seller_dashboard_screen')">Sell</a>
-        <a href="#" onclick="navigateTo('cart_screen')">Cart (${window.state.getCart().length})</a>
+        ${isSeller ? '<a href="#" onclick="navigateTo(\'seller_dashboard_screen\')">Sell</a>' : ''}
+        <a href="#" onclick="navigateTo('cart_screen')">Cart</a>
         <a href="#" onclick="handleLogout()">Logout</a>
       `;
     } else {
       nav.innerHTML = `
-        <a href="#" onclick="navigateTo('login_screen')">Sell</a>
         <a href="#" onclick="navigateTo('login_screen')">Login</a>
         <a href="#" onclick="navigateTo('register_screen')">Register</a>
       `;
@@ -515,9 +515,49 @@ function attachAdminDashboardEvents() {
   });
 }
 
-function showAdminDashboard() {
+async function showAdminDashboard() {
   const mainContent = document.querySelector('.main-content');
   if (!mainContent) return;
+
+  mainContent.innerHTML = '<h2>Dashboard</h2><p>Loading...</p>';
+
+  let ordersHtml = '';
+  try {
+    const response = await fetch('UI/orders_get_all.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success && result.orders.length > 0) {
+      const statusStyle = (status) => {
+        if (status === 'completed') return 'background:#e8f7ee;color:#27ae60;';
+        if (status === 'pending') return 'background:#ffeaea;color:#e74c3c;';
+        if (status === 'active') return 'background:#fff4e6;color:#f39c12;';
+        return '';
+      };
+
+      const recentOrders = result.orders.slice(0, 5);
+      const rows = recentOrders.map(o => `
+        <tr>
+          <td>#${o.id}</td>
+          <td>${o.userName}</td>
+          <td><span style="padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;${statusStyle(o.status)}">${o.status}</span></td>
+          <td>${o.date}</td>
+        </tr>
+      `).join('');
+
+      ordersHtml = `
+        <h3 class="section-title">Recent Orders</h3>
+        <table>
+          <thead><tr><th>Order ID</th><th>User</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    } else {
+      ordersHtml = '<h3 class="section-title">Recent Orders</h3><p>No orders yet.</p>';
+    }
+  } catch (e) {
+    ordersHtml = '<h3 class="section-title">Recent Orders</h3><p>Error loading orders.</p>';
+  }
 
   mainContent.innerHTML = `
     <h2>Dashboard</h2>
@@ -525,7 +565,7 @@ function showAdminDashboard() {
       <div class="card users">
         <i class="fas fa-users"></i>
         <div>
-          <div class="card-number">2</div>
+          <div class="card-number">—</div>
           <div class="card-text">Users</div>
         </div>
       </div>
@@ -539,7 +579,7 @@ function showAdminDashboard() {
       <div class="card orders">
         <i class="fas fa-clipboard-list"></i>
         <div>
-          <div class="card-number">4</div>
+          <div class="card-number">—</div>
           <div class="card-text">Orders</div>
         </div>
       </div>
@@ -551,47 +591,47 @@ function showAdminDashboard() {
         </div>
       </div>
     </div>
-
-    <h3 class="section-title">Recent Orders</h3>
-    <table>
-      <thead>
-        <tr><th>Order ID</th><th>User</th><th>Total</th><th>Status</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>#1001</td><td>Jade Clegg</td><td>R1,000.00</td><td><span class="status completed">Completed</span></td></tr>
-        <tr><td>#1002</td><td>Jade Clegg</td><td>R950.00</td><td><span class="status processing">Processing</span></td></tr>
-        <tr><td>#1003</td><td>Jade Clegg</td><td>R1,250.00</td><td><span class="status pending">Pending</span></td></tr>
-        <tr><td>#1004</td><td>Ivan Zaltsman</td><td>R650.00</td><td><span class="status completed">Completed</span></td></tr>
-      </tbody>
-    </table>
+    ${ordersHtml}
   `;
 }
 
-function showAdminProducts() {
+async function showAdminProducts() {
   const mainContent = document.querySelector('.main-content');
   if (!mainContent) return;
 
-  const products = window.state.getProducts();
-  const rows = products.map(p => `
-    <tr>
-      <td>${p.id}</td>
-      <td><img src="${p.image || ''}" style="width:40px;height:40px;object-fit:contain;"> ${p.name}</td>
-      <td>R${parseFloat(p.price).toFixed(2)}</td>
-      <td>${categoryMap[p.categoryId] || 'Unknown'}</td>
-      <td>${p.status || 'N/A'}</td>
-      <td><button onclick="adminDeleteProduct(${p.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button></td>
-    </tr>
-  `).join('');
+  mainContent.innerHTML = '<h2>Products</h2><p>Loading...</p>';
 
-  mainContent.innerHTML = `
-    <h2>Products</h2>
-    <table>
-      <thead>
-        <tr><th>ID</th><th>Product</th><th>Price</th><th>Category</th><th>Status</th><th>Action</th></tr>
-      </thead>
-      <tbody>${rows || '<tr><td colspan="6" style="text-align:center;padding:20px;">No products loaded.</td></tr>'}</tbody>
-    </table>
-  `;
+  try {
+    const response = await fetch('UI/get_all_products_admin.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      const rows = result.products.map(p => `
+        <tr style="${p.isDeleted == 1 ? 'opacity:0.5;' : ''}">
+          <td>${p.id}</td>
+          <td><img src="${p.image || ''}" style="width:40px;height:40px;object-fit:contain;"> ${p.name}</td>
+          <td>R${parseFloat(p.price).toFixed(2)}</td>
+          <td>${categoryMap[p.categoryId] || 'Unknown'}</td>
+          <td>${p.sellerName}</td>
+          <td>${p.isDeleted == 1 ? '<span style="color:red;">Deleted</span>' : p.status}</td>
+          <td>${p.isDeleted == 0 ? `<button onclick="adminDeleteProduct(${p.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button>` : '—'}</td>
+        </tr>
+      `).join('');
+
+      mainContent.innerHTML = `
+        <h2>Products</h2>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Product</th><th>Price</th><th>Category</th><th>Seller</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="7" style="text-align:center;padding:20px;">No products found.</td></tr>'}</tbody>
+        </table>
+      `;
+    }
+  } catch (e) {
+    mainContent.innerHTML = '<h2>Products</h2><p>Error connecting to server.</p>';
+  }
 }
 
 async function adminDeleteProduct(productId) {
@@ -634,12 +674,24 @@ async function showAdminUsers() {
     const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
 
     if (result.success) {
+      const roleLabel = (rid) => {
+        if (rid == 1) return 'User';
+        if (rid == 2) return 'Admin';
+        if (rid == 3) return 'Seller';
+        return 'Unknown';
+      };
+
       const rows = result.users.map(u => `
         <tr>
           <td>${u.userId}</td>
           <td>${u.name}</td>
           <td>${u.email}</td>
-          <td>${u.roleId == 2 ? 'Admin' : 'User'}</td>
+          <td>
+            ${u.roleId == 2 ? 'Admin' : `<select onchange="adminChangeRole(${u.userId}, this.value)" style="padding:4px;border-radius:3px;border:1px solid #ddd;">
+              <option value="1" ${u.roleId == 1 ? 'selected' : ''}>User</option>
+              <option value="3" ${u.roleId == 3 ? 'selected' : ''}>Seller</option>
+            </select>`}
+          </td>
           <td>${u.isDisabled == 1 ? '<span style="color:red;">Disabled</span>' : '<span style="color:green;">Active</span>'}</td>
           <td>
             ${u.roleId != 2 ? `<button onclick="adminToggleUser(${u.userId}, ${u.isDisabled == 1 ? 0 : 1})" style="background:${u.isDisabled == 1 ? '#27ae60' : '#e67e22'};color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">${u.isDisabled == 1 ? 'Enable' : 'Disable'}</button>` : '—'}
@@ -687,33 +739,113 @@ async function adminToggleUser(userId, isDisabled) {
 
 window.adminToggleUser = adminToggleUser;
 
-function showAdminCategories() {
+async function showAdminCategories() {
   const mainContent = document.querySelector('.main-content');
   if (!mainContent) return;
 
-  const categories = [
-    { id: 1, name: 'Electronics' },
-    { id: 2, name: 'Fashion' },
-    { id: 3, name: 'Home & Living' },
-    { id: 4, name: 'Books' },
-    { id: 5, name: 'Sports' },
-    { id: 6, name: 'Vehicles' }
-  ];
+  mainContent.innerHTML = '<h2>Categories</h2><p>Loading...</p>';
 
-  const rows = categories.map(c => `
-    <tr><td>${c.id}</td><td>${c.name}</td></tr>
-  `).join('');
+  try {
+    const response = await fetch('UI/get_categories.php?includeDeleted=1');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
 
-  mainContent.innerHTML = `
-    <h2>Categories</h2>
-    <table>
-      <thead>
-        <tr><th>ID</th><th>Category Name</th></tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+    if (result.success) {
+      const rows = result.categories.map(c => `
+        <tr style="${c.isDeleted == 1 ? 'opacity:0.5;' : ''}">
+          <td>${c.id}</td>
+          <td><img src="${c.icon || ''}" style="width:30px;height:30px;object-fit:contain;"></td>
+          <td>${c.categoryName}</td>
+          <td>${c.description}</td>
+          <td>${c.isDeleted == 1 ? '<span style="color:red;">Deleted</span>' : '<span style="color:green;">Active</span>'}</td>
+          <td>${c.isDeleted == 0 ? `<button onclick="adminDeleteCategory(${c.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button>` : '—'}</td>
+        </tr>
+      `).join('');
+
+      mainContent.innerHTML = `
+        <h2>Categories</h2>
+        <button onclick="showAddCategoryForm()" style="background:#6c63ff;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-weight:bold;margin-bottom:15px;">+ Add Category</button>
+        <div id="addCategoryForm" style="display:none;background:#f9f9f9;padding:15px;border:1px solid #ddd;border-radius:4px;margin-bottom:15px;">
+          <h3 style="margin-bottom:10px;">Add Category</h3>
+          <div style="margin-bottom:8px;"><label style="font-size:13px;">Name</label><input type="text" id="newCatName" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;"></div>
+          <div style="margin-bottom:8px;"><label style="font-size:13px;">Description</label><input type="text" id="newCatDesc" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;"></div>
+          <div style="margin-bottom:8px;"><label style="font-size:13px;">Icon URL</label><input type="text" id="newCatIcon" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;" placeholder="https://cdn-icons-png.flaticon.com/..."></div>
+          <button onclick="submitNewCategory()" style="background:#27ae60;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Save</button>
+          <button onclick="document.getElementById('addCategoryForm').style.display='none'" style="background:#999;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin-left:5px;">Cancel</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Icon</th><th>Name</th><th>Description</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+  } catch (e) {
+    mainContent.innerHTML = '<h2>Categories</h2><p>Error connecting to server.</p>';
+  }
 }
+
+function showAddCategoryForm() {
+  document.getElementById('addCategoryForm').style.display = 'block';
+}
+
+async function submitNewCategory() {
+  const name = document.getElementById('newCatName').value;
+  const description = document.getElementById('newCatDesc').value;
+  const icon = document.getElementById('newCatIcon').value;
+
+  if (!name || !description) {
+    alert('Name and description are required.');
+    return;
+  }
+
+  try {
+    const response = await fetch('UI/admin_add_category.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryName: name, description, icon })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Category added!');
+      showAdminCategories();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+async function adminDeleteCategory(categoryId) {
+  if (!confirm('Are you sure you want to delete this category?')) return;
+
+  try {
+    const response = await fetch('UI/admin_delete_category.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Category deleted.');
+      showAdminCategories();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.showAddCategoryForm = showAddCategoryForm;
+window.submitNewCategory = submitNewCategory;
+window.adminDeleteCategory = adminDeleteCategory;
 
 window.attachAdminDashboardEvents = attachAdminDashboardEvents;
 window.showAdminDashboard = showAdminDashboard;
@@ -762,6 +894,7 @@ function attachRegisterScreenEvents() {
       const password = document.getElementById('regPassword').value;
       const errorEl = document.getElementById('registerError');
       const agreeCheckbox = document.getElementById('agreeTerms');
+      const roleId = document.getElementById('regRole').value;
 
       if (!agreeCheckbox.checked) {
         errorEl.textContent = 'You must agree to the Terms & Conditions and Privacy Policy.';
@@ -773,7 +906,7 @@ function attachRegisterScreenEvents() {
         const response = await fetch('UI/register_api.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({ name, email, password, roleId: parseInt(roleId) })
         });
         const rawText = await response.text();
         const cleanText = rawText.replace(/^\uFEFF/, '');
@@ -1028,9 +1161,10 @@ async function viewOrderDetails(orderId) {
       const rows = result.items.map(item => {
         const price = parseFloat(item.price);
         total += price;
+        const deletedTag = item.isDeleted == 1 ? ' <span style="color:red;font-size:11px;">(deleted)</span>' : '';
         return `
-          <tr>
-            <td><img src="${item.image || ''}" style="width:30px;height:30px;object-fit:contain;"> ${item.name}</td>
+          <tr style="${item.isDeleted == 1 ? 'opacity:0.6;' : ''}">
+            <td><img src="${item.image || ''}" style="width:30px;height:30px;object-fit:contain;"> ${item.name}${deletedTag}</td>
             <td>R${price.toFixed(2)}</td>
           </tr>
         `;
@@ -1056,3 +1190,26 @@ async function viewOrderDetails(orderId) {
 
 window.showAdminOrders = showAdminOrders;
 window.viewOrderDetails = viewOrderDetails;
+
+async function adminChangeRole(userId, roleId) {
+  try {
+    const response = await fetch('UI/admin_update_role.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, roleId: parseInt(roleId) })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Role updated.');
+    } else {
+      alert('Error: ' + result.message);
+      showAdminUsers();
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.adminChangeRole = adminChangeRole;

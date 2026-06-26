@@ -8,6 +8,12 @@ $input = json_decode(file_get_contents('php://input'), true);
 $name = $input['name'] ?? '';
 $email = $input['email'] ?? '';
 $password = $input['password'] ?? '';
+$roleId = $input['roleId'] ?? 1;
+
+// Only allow user (1) or seller (3) roles via registration
+if (!in_array($roleId, [1, 3])) {
+    $roleId = 1;
+}
 
 if (empty($name) || empty($email) || empty($password)) {
     echo json_encode(['success' => false, 'message' => 'All fields are required']);
@@ -28,7 +34,7 @@ try {
     // Register user
     $register_sql = ltrim(file_get_contents(__DIR__ . '/../SQL/queries/users/addUser.sql'), "\xEF\xBB\xBF");
     $stmt = $pdo->prepare($register_sql);
-    $stmt->execute([$name, $email, $password, 1]);
+    $stmt->execute([$name, $email, $password, $roleId]);
 
     $userId = $pdo->lastInsertId();
 
@@ -38,7 +44,7 @@ try {
             'userId' => $userId,
             'name' => $name,
             'email' => $email,
-            'roleId' => 1
+            'roleId' => $roleId
         ]
     ]);
 } catch (Exception $e) {
