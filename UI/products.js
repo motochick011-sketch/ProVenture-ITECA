@@ -100,3 +100,18 @@ function filterByCategory(categoryId) {
 }
 
 window.filterByCategory = filterByCategory;
+
+function searchProducts(query) {
+  const allProducts = window.state.getProducts();
+  if (!query || query.trim() === '') {
+    renderProducts(allProducts);
+    return;
+  }
+
+  const filtered = allProducts.filter(product =>
+    product.name.toLowerCase().includes(query.toLowerCase())
+  );
+  renderProducts(filtered);
+}
+
+window.searchProducts = searchProducts;

@@ -136,7 +136,7 @@
     <div class="logo" style="cursor:pointer;" onclick="navigateTo('main_screen')">Pro-Venture</div>
 
     <div class="search-bar">
-      <input type="text" placeholder="Search for products...">
+      <input type="text" id="productSearchInput" placeholder="Search for products..." oninput="searchProducts(this.value)">
     </div>
 
     <nav>
