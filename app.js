@@ -813,7 +813,7 @@ async function showAdminCategories() {
           <td>${c.categoryName}</td>
           <td>${c.description}</td>
           <td>${c.isDeleted == 1 ? '<span style="color:red;">Deleted</span>' : '<span style="color:green;">Active</span>'}</td>
-          <td>${c.isDeleted == 0 ? `<button onclick="adminDeleteCategory(${c.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button>` : '—'}</td>
+         <td>${c.isDeleted == 0 ? `<button onclick="adminDeleteCategory(${c.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button>` : `<button onclick="adminRestoreCategory(${c.id})" style="background:#27ae60;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Restore</button>`}</td>
         </tr>
       `).join('');
 
