@@ -48,6 +48,11 @@ async function loadScreen(screenId, queryParams = '') {
     }
     else if (screenId === 'product_listings_screen') {
       await loadProductsScript();
+      // Apply category filter if navigated from homepage category
+      if (window.pendingCategoryFilter) {
+        filterByCategory(window.pendingCategoryFilter);
+        window.pendingCategoryFilter = null;
+      }
     } else if (screenId === 'product_details_screen') {
       displayProductDetails(productId);
     } else if (screenId === 'login_screen') {
@@ -78,7 +83,7 @@ function updateNavLinks() {
   navContainers.forEach(nav => {
     const user = window.state.getUser();
     if (user) {
-      const isSeller = user.role == 2 || user.role == 3;
+      const isSeller = user.roleId == 2 || user.roleId == 3 || user.role == 2 || user.role == 3;
       nav.innerHTML = `
         ${isSeller ? '<a href="#" onclick="navigateTo(\'seller_dashboard_screen\')">Sell</a>' : ''}
         <a href="#" onclick="navigateTo('cart_screen')">Cart</a>
@@ -120,7 +125,40 @@ function attachMainScreenEvents() {
       navigateTo("product_detail?id=${productId}");
     });
   });
+
+  // Load categories from DB
+  loadHomeCategories();
 }
+
+async function loadHomeCategories() {
+  const box = document.getElementById('homeCategoryBox');
+  if (!box) return;
+
+  try {
+    const response = await fetch('UI/get_categories.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      box.innerHTML = result.categories.map(c => `
+        <div class="card" style="cursor:pointer;" onclick="navigateToCategory(${c.id})">
+          <i class="fas fa-${c.icon || 'tag'}" style="font-size:40px;color:#5a50c8;margin-bottom:10px;"></i>
+          <p>${c.categoryName}</p>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('Error loading categories:', e);
+  }
+}
+
+function navigateToCategory(categoryId) {
+  window.pendingCategoryFilter = categoryId;
+  navigateTo('product_listings_screen');
+}
+
+window.loadHomeCategories = loadHomeCategories;
+window.navigateToCategory = navigateToCategory;
 loadScreen('main_screen');
 
 const categoryMap = {
@@ -521,6 +559,15 @@ async function showAdminDashboard() {
 
   mainContent.innerHTML = '<h2>Dashboard</h2><p>Loading...</p>';
 
+  // Fetch stats
+  let stats = { users: '—', orders: '—', products: '—', categories: '—', revenue: 0 };
+  try {
+    const statsResp = await fetch('UI/admin_stats.php');
+    const statsRaw = await statsResp.text();
+    const statsResult = JSON.parse(statsRaw.replace(/^\uFEFF/, ''));
+    if (statsResult.success) stats = statsResult;
+  } catch (e) {}
+
   let ordersHtml = '';
   try {
     const response = await fetch('UI/orders_get_all.php');
@@ -565,29 +612,36 @@ async function showAdminDashboard() {
       <div class="card users">
         <i class="fas fa-users"></i>
         <div>
-          <div class="card-number">—</div>
+          <div class="card-number">${stats.users}</div>
           <div class="card-text">Users</div>
         </div>
       </div>
       <div class="card products">
         <i class="fas fa-box"></i>
         <div>
-          <div class="card-number">${window.state.getProducts().length}</div>
+          <div class="card-number">${stats.products}</div>
           <div class="card-text">Products</div>
         </div>
       </div>
       <div class="card orders">
         <i class="fas fa-clipboard-list"></i>
         <div>
-          <div class="card-number">—</div>
+          <div class="card-number">${stats.orders}</div>
           <div class="card-text">Orders</div>
         </div>
       </div>
       <div class="card categories">
         <i class="fas fa-table-cells-large"></i>
         <div>
-          <div class="card-number">6</div>
+          <div class="card-number">${stats.categories}</div>
           <div class="card-text">Categories</div>
+        </div>
+      </div>
+      <div class="card" style="flex:1;border:1px solid #eee;border-radius:8px;padding:18px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <i class="fas fa-money-bill-wave" style="font-size:20px;padding:10px;border-radius:6px;color:#27ae60;background:#e9f8ef;"></i>
+        <div>
+          <div class="card-number">R${parseFloat(stats.revenue).toFixed(2)}</div>
+          <div class="card-text">Revenue</div>
         </div>
       </div>
     </div>
@@ -754,7 +808,7 @@ async function showAdminCategories() {
       const rows = result.categories.map(c => `
         <tr style="${c.isDeleted == 1 ? 'opacity:0.5;' : ''}">
           <td>${c.id}</td>
-          <td><img src="${c.icon || ''}" style="width:30px;height:30px;object-fit:contain;"></td>
+          <td><i class="fas fa-${c.icon || 'tag'}" style="font-size:24px;color:#6c63ff;"></i></td>
           <td>${c.categoryName}</td>
           <td>${c.description}</td>
           <td>${c.isDeleted == 1 ? '<span style="color:red;">Deleted</span>' : '<span style="color:green;">Active</span>'}</td>
