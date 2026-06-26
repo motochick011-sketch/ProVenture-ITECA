@@ -25,6 +25,12 @@ async function loadScreen(screenId, queryParams = '') {
       screenPath = "UI/shopping_chart.html";
     } else if (screenId === 'admin_dashboard_screen') {
       screenPath = "UI/admin_dashboard.html";
+    } else if (screenId === 'seller_dashboard_screen') {
+      screenPath = "UI/seller_dashboard.html";
+    } else if (screenId === 'terms_screen') {
+      screenPath = "UI/terms.html";
+    } else if (screenId === 'privacy_screen') {
+      screenPath = "UI/privacy.html";
     } else {
       screenPath = "UI/main_screen.html";
     }
@@ -51,8 +57,10 @@ async function loadScreen(screenId, queryParams = '') {
     } else if (screenId === 'admin_dashboard_screen') {
       attachAdminDashboardEvents();
       showAdminDashboard();
+    } else if (screenId === 'seller_dashboard_screen') {
+      loadSellerProducts();
     } else if (screenId === 'register_screen') {
-      // attachRegisterScreenEvents();
+      attachRegisterScreenEvents();
     }
   } catch (error) {
     console.error('Error loading screen:', error);
@@ -71,13 +79,13 @@ function updateNavLinks() {
     const user = window.state.getUser();
     if (user) {
       nav.innerHTML = `
-        <a href="#">Sell</a>
+        <a href="#" onclick="navigateTo('seller_dashboard_screen')">Sell</a>
         <a href="#" onclick="navigateTo('cart_screen')">Cart (${window.state.getCart().length})</a>
         <a href="#" onclick="handleLogout()">Logout</a>
       `;
     } else {
       nav.innerHTML = `
-        <a href="#">Sell</a>
+        <a href="#" onclick="navigateTo('login_screen')">Sell</a>
         <a href="#" onclick="navigateTo('login_screen')">Login</a>
         <a href="#" onclick="navigateTo('register_screen')">Register</a>
       `;
@@ -186,20 +194,31 @@ function displayProductDetails(productId) {
 
 window.displayProductDetails = displayProductDetails;
 
-function addToCart() {
-  if (!window.state.getUser()) {
+async function addToCart() {
+  const user = window.state.getUser();
+  if (!user) {
     alert('Please log in to add items to your cart.');
     return;
   }
 
   const productId = window.currentProductId;
-  const products = window.state.getProducts();
-  const product = products.find(p => p.id == productId);
 
-  if (product) {
-    window.state.addToCart(product);
-    alert(product.name + ' added to cart!');
-    console.log('Cart:', window.state.getCart());
+  try {
+    const response = await fetch('UI/cart_add_item.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.userId, productId: parseInt(productId) })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Item added to cart!');
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
   }
 }
 
@@ -240,27 +259,38 @@ async function loadProductsScript() {
 function attachLoginScreenEvents() {
   const userForm = document.getElementById('loginForm');
   if (userForm) {
-    userForm.onsubmit = function(event) {
+    userForm.onsubmit = async function(event) {
       event.preventDefault();
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
 
-      const validEmail = 'jadeclegg11@gmail.com';
-      const validPassword = '12345';
-
-      if (email === validEmail && password === validPassword) {
-        window.state.setUser({
-          id: 1,
-          userName: 'Jade',
-          email: 'jadeclegg11@gmail.com',
-          role: 1
+      try {
+        const response = await fetch('UI/login_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
         });
-        errorEl.style.display = 'none';
-        alert('Login Successful!');
-        navigateTo('main_screen');
-      } else {
-        errorEl.textContent = 'Invalid email or password.';
+        const rawText = await response.text();
+        const cleanText = rawText.replace(/^\uFEFF/, '');
+        const result = JSON.parse(cleanText);
+
+        if (result.success) {
+          window.state.setUser({
+            id: result.user.userId,
+            userName: result.user.name,
+            email: result.user.email,
+            role: result.user.roleId
+          });
+          errorEl.style.display = 'none';
+          alert('Login Successful!');
+          navigateTo('main_screen');
+        } else {
+          errorEl.textContent = result.message;
+          errorEl.style.display = 'block';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Error connecting to server.';
         errorEl.style.display = 'block';
       }
     };
@@ -270,26 +300,43 @@ function attachLoginScreenEvents() {
   if (adminForm) {
     adminForm.onsubmit = async function(event) {
       event.preventDefault();
-      const username = document.getElementById('adminUsername').value;
+      const email = document.getElementById('adminUsername').value;
       const password = document.getElementById('adminPassword').value;
       const errorEl = document.getElementById('adminLoginError');
 
-      const validUsername = 'admin';
-      const validPassword = 'admin123';
-
-      if (username === validUsername && password === validPassword) {
-        window.state.setUser({
-          id: 99,
-          userName: 'Admin',
-          email: 'admin@proventure.com',
-          role: 'admin'
+      try {
+        const response = await fetch('UI/login_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
         });
-        errorEl.style.display = 'none';
-        alert('Admin Login Successful!');
-        await fetchProductsIfNeeded();
-        navigateTo('admin_dashboard_screen');
-      } else {
-        errorEl.textContent = 'Invalid admin credentials.';
+        const rawText = await response.text();
+        const cleanText = rawText.replace(/^\uFEFF/, '');
+        const result = JSON.parse(cleanText);
+
+        if (result.success) {
+          // Check if user has admin role (roleId 2)
+          if (result.user.roleId == 2) {
+            window.state.setUser({
+              id: result.user.userId,
+              userName: result.user.name,
+              email: result.user.email,
+              role: result.user.roleId
+            });
+            errorEl.style.display = 'none';
+            alert('Admin Login Successful!');
+            await fetchProductsIfNeeded();
+            navigateTo('admin_dashboard_screen');
+          } else {
+            errorEl.textContent = 'This account does not have admin privileges.';
+            errorEl.style.display = 'block';
+          }
+        } else {
+          errorEl.textContent = result.message;
+          errorEl.style.display = 'block';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Error connecting to server.';
         errorEl.style.display = 'block';
       }
     };
@@ -314,62 +361,130 @@ window.showForm = function(type) {
     userBtn.classList.remove("active");
   }
 };
-function displayCart() {
-  const cart = window.state.getCart();
-  const tbody = document.querySelector('.cart tbody');
-  const totalEl = document.querySelector('.total-price');
-  const continueBtn = document.querySelector('.btn-secondary');
+async function displayCart() {
+  const user = window.state.getUser();
+  if (!user) return;
 
-  if (continueBtn) {
-    continueBtn.onclick = () => navigateTo('product_listings_screen');
-  }
-
+  const tbody = document.getElementById('cartBody');
+  const totalEl = document.getElementById('cartTotal');
   if (!tbody) return;
 
-  if (cart.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;">Your cart is empty</td></tr>';
-    if (totalEl) totalEl.textContent = 'R0.00';
+  try {
+    const response = await fetch('UI/cart_get.php?userId=' + user.userId);
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      window.currentOrderId = result.orderId;
+
+      if (!result.items || result.items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;">Your cart is empty</td></tr>';
+        if (totalEl) totalEl.textContent = 'R0.00';
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) checkoutBtn.style.display = 'none';
+        return;
+      }
+
+      let total = 0;
+      tbody.innerHTML = result.items.map(item => {
+        const price = parseFloat(item.price);
+        total += price;
+        return `
+          <tr>
+            <td>
+              <div class="product">
+                <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
+                <span><strong>${item.name}</strong></span>
+              </div>
+            </td>
+            <td>R${price.toFixed(2)}</td>
+            <td><span class="delete" onclick="removeCartItem(${item.cartItemId})">🗑 Remove</span></td>
+            <td>R${price.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      if (totalEl) totalEl.textContent = 'R' + total.toFixed(2);
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;">Error loading cart.</td></tr>';
+  }
+}
+
+async function removeCartItem(cartItemId) {
+  try {
+    const response = await fetch('UI/cart_remove_item.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cartItemId })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      displayCart();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+async function proceedToCheckout() {
+  if (!window.currentOrderId) {
+    alert('No items in cart.');
     return;
   }
 
-  let total = 0;
-  tbody.innerHTML = cart.map((item, index) => {
-    const price = parseFloat(item.price);
-    total += price;
-    return `
-      <tr>
-        <td>
-          <div class="product">
-            <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
-            <span><strong>${item.name}</strong></span>
-          </div>
-        </td>
-        <td>R${price.toFixed(2)}</td>
-        <td>
-          <div class="quantity">
-            <span>1</span>
-            <span class="delete" onclick="removeFromCart(${index})">🗑️</span>
-          </div>
-        </td>
-        <td>R${price.toFixed(2)}</td>
-      </tr>
-    `;
-  }).join('');
+  try {
+    const response = await fetch('UI/cart_checkout.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: window.currentOrderId, action: 'pending' })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
 
-  if (totalEl) totalEl.textContent = 'R' + total.toFixed(2);
+    if (result.success) {
+      document.getElementById('cartSection').style.display = 'none';
+      const paymentSection = document.getElementById('paymentSection');
+      paymentSection.style.display = 'block';
+      document.getElementById('paymentTotal').textContent = document.getElementById('cartTotal').textContent;
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
 }
 
-function removeFromCart(index) {
-  const cart = window.state.getCart();
-  cart.splice(index, 1);
-  sessionStorage.setItem('cart', JSON.stringify(cart));
-  window.state.cart = cart;
-  displayCart();
-  updateNavLinks();
+async function confirmPayment() {
+  try {
+    const response = await fetch('UI/cart_checkout.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: window.currentOrderId, action: 'completed' })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Payment confirmed! Your order is complete.');
+      window.currentOrderId = null;
+      navigateTo('main_screen');
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
 }
 
 window.displayCart = displayCart;
-window.removeFromCart = removeFromCart;
+window.removeCartItem = removeCartItem;
+window.proceedToCheckout = proceedToCheckout;
+window.confirmPayment = confirmPayment;
 
 function attachAdminDashboardEvents() {
   const sidebarItems = document.querySelectorAll('.sidebar ul li');
@@ -386,6 +501,8 @@ function attachAdminDashboardEvents() {
         showAdminProducts();
       } else if (text.includes('Users')) {
         showAdminUsers();
+      } else if (text.includes('Orders')) {
+        showAdminOrders();
       } else if (text.includes('Categories')) {
         showAdminCategories();
       } else if (text.includes('Logout')) {
@@ -462,6 +579,7 @@ function showAdminProducts() {
       <td>R${parseFloat(p.price).toFixed(2)}</td>
       <td>${categoryMap[p.categoryId] || 'Unknown'}</td>
       <td>${p.status || 'N/A'}</td>
+      <td><button onclick="adminDeleteProduct(${p.id})" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Delete</button></td>
     </tr>
   `).join('');
 
@@ -469,31 +587,105 @@ function showAdminProducts() {
     <h2>Products</h2>
     <table>
       <thead>
-        <tr><th>ID</th><th>Product</th><th>Price</th><th>Category</th><th>Status</th></tr>
+        <tr><th>ID</th><th>Product</th><th>Price</th><th>Category</th><th>Status</th><th>Action</th></tr>
       </thead>
-      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;padding:20px;">No products loaded. Visit the shop first to load products.</td></tr>'}</tbody>
+      <tbody>${rows || '<tr><td colspan="6" style="text-align:center;padding:20px;">No products loaded.</td></tr>'}</tbody>
     </table>
   `;
 }
 
-function showAdminUsers() {
+async function adminDeleteProduct(productId) {
+  if (!confirm('Are you sure you want to delete this product?')) return;
+
+  try {
+    const response = await fetch('UI/admin_delete_product.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      // Remove from local state
+      const products = window.state.getProducts().filter(p => p.id != productId);
+      window.state.setProducts(products);
+      alert('Product deleted.');
+      showAdminProducts();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.adminDeleteProduct = adminDeleteProduct;
+
+async function showAdminUsers() {
   const mainContent = document.querySelector('.main-content');
   if (!mainContent) return;
 
-  mainContent.innerHTML = `
-    <h2>Users</h2>
-    <table>
-      <thead>
-        <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>Jade</td><td>jadeclegg11@gmail.com</td><td>User</td></tr>
-        <tr><td>99</td><td>Admin</td><td>admin@proventure.com</td><td>Admin</td></tr>
-        <tr><td>1</td><td>Ivan</td><td>ivanzaltsman@gmail.com</td><td>User</td></tr>
-      </tbody>
-    </table>
-  `;
+  mainContent.innerHTML = '<h2>Users</h2><p>Loading...</p>';
+
+  try {
+    const response = await fetch('UI/get_users.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      const rows = result.users.map(u => `
+        <tr>
+          <td>${u.userId}</td>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td>${u.roleId == 2 ? 'Admin' : 'User'}</td>
+          <td>${u.isDisabled == 1 ? '<span style="color:red;">Disabled</span>' : '<span style="color:green;">Active</span>'}</td>
+          <td>
+            ${u.roleId != 2 ? `<button onclick="adminToggleUser(${u.userId}, ${u.isDisabled == 1 ? 0 : 1})" style="background:${u.isDisabled == 1 ? '#27ae60' : '#e67e22'};color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">${u.isDisabled == 1 ? 'Enable' : 'Disable'}</button>` : '—'}
+          </td>
+        </tr>
+      `).join('');
+
+      mainContent.innerHTML = `
+        <h2>Users</h2>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    } else {
+      mainContent.innerHTML = '<h2>Users</h2><p>Failed to load users.</p>';
+    }
+  } catch (e) {
+    mainContent.innerHTML = '<h2>Users</h2><p>Error connecting to server.</p>';
+  }
 }
+
+async function adminToggleUser(userId, isDisabled) {
+  try {
+    const response = await fetch('UI/admin_disable_user.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, isDisabled })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert(result.message);
+      showAdminUsers();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.adminToggleUser = adminToggleUser;
 
 function showAdminCategories() {
   const mainContent = document.querySelector('.main-content');
@@ -559,3 +751,308 @@ async function fetchProductsIfNeeded() {
 }
 
 window.fetchProductsIfNeeded = fetchProductsIfNeeded;
+
+function attachRegisterScreenEvents() {
+  const form = document.getElementById('registerForm');
+  if (form) {
+    form.onsubmit = async function(event) {
+      event.preventDefault();
+      const name = document.getElementById('fullname').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const errorEl = document.getElementById('registerError');
+      const agreeCheckbox = document.getElementById('agreeTerms');
+
+      if (!agreeCheckbox.checked) {
+        errorEl.textContent = 'You must agree to the Terms & Conditions and Privacy Policy.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('UI/register_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const rawText = await response.text();
+        const cleanText = rawText.replace(/^\uFEFF/, '');
+        const result = JSON.parse(cleanText);
+
+        if (result.success) {
+          window.state.setUser({
+            id: result.user.userId,
+            userName: result.user.name,
+            email: result.user.email,
+            role: result.user.roleId
+          });
+          errorEl.style.display = 'none';
+          alert('Registration Successful!');
+          navigateTo('main_screen');
+        } else {
+          errorEl.textContent = result.message;
+          errorEl.style.display = 'block';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Error connecting to server.';
+        errorEl.style.display = 'block';
+      }
+    };
+  }
+}
+
+// Seller Dashboard Functions
+async function loadSellerProducts() {
+  const user = window.state.getUser();
+  if (!user) {
+    alert('Please log in first.');
+    navigateTo('login_screen');
+    return;
+  }
+
+  const tbody = document.getElementById('sellerProductsBody');
+  if (!tbody) return;
+
+  try {
+    const response = await fetch('UI/get_seller_products.php?sellerId=' + user.userId);
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      if (result.products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">You have no products yet. Click "+ Add New Product" to get started.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = result.products.map(p => `
+        <tr>
+          <td><img src="${p.image || ''}">${p.name}</td>
+          <td>R${parseFloat(p.price).toFixed(2)}</td>
+          <td>${categoryMap[p.categoryId] || 'Unknown'}</td>
+          <td>${p.status}</td>
+          <td class="actions">
+            <button class="btn btn-warning" onclick="sellerEditProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}', '${(p.description || '').replace(/'/g, "\\'")}', ${p.price}, ${p.categoryId}, '${(p.image || '').replace(/'/g, "\\'")}')">Edit</button>
+            <button class="btn btn-danger" onclick="sellerDeleteProduct(${p.id})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Error loading products.</td></tr>';
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Error connecting to server.</td></tr>';
+  }
+}
+
+function showSellerAddForm() {
+  document.getElementById('formTitle').textContent = 'Add Product';
+  document.getElementById('editProductId').value = '';
+  document.getElementById('spName').value = '';
+  document.getElementById('spDescription').value = '';
+  document.getElementById('spPrice').value = '';
+  document.getElementById('spCategory').value = '1';
+  document.getElementById('spImage').value = '';
+  document.getElementById('sellerProductForm').classList.add('visible');
+}
+
+function sellerEditProduct(id, name, description, price, categoryId, image) {
+  document.getElementById('formTitle').textContent = 'Edit Product';
+  document.getElementById('editProductId').value = id;
+  document.getElementById('spName').value = name;
+  document.getElementById('spDescription').value = description;
+  document.getElementById('spPrice').value = price;
+  document.getElementById('spCategory').value = categoryId;
+  document.getElementById('spImage').value = image;
+  document.getElementById('sellerProductForm').classList.add('visible');
+}
+
+function hideSellerForm() {
+  document.getElementById('sellerProductForm').classList.remove('visible');
+}
+
+async function submitSellerProduct() {
+  const user = window.state.getUser();
+  const editId = document.getElementById('editProductId').value;
+  const name = document.getElementById('spName').value;
+  const description = document.getElementById('spDescription').value;
+  const price = document.getElementById('spPrice').value;
+  const categoryId = document.getElementById('spCategory').value;
+  const image = document.getElementById('spImage').value;
+
+  if (!name || !description || !price) {
+    alert('Please fill in name, description, and price.');
+    return;
+  }
+
+  const payload = {
+    sellerId: user.userId,
+    categoryId: parseInt(categoryId),
+    name,
+    description,
+    price: parseFloat(price),
+    status: 'available',
+    image
+  };
+
+  try {
+    let url;
+    if (editId) {
+      payload.id = parseInt(editId);
+      url = 'UI/seller_update_product.php';
+    } else {
+      url = 'UI/seller_add_product.php';
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert(editId ? 'Product updated!' : 'Product added!');
+      hideSellerForm();
+      loadSellerProducts();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+async function sellerDeleteProduct(productId) {
+  if (!confirm('Are you sure you want to delete this product?')) return;
+
+  try {
+    const response = await fetch('UI/seller_delete_product.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Product deleted.');
+      loadSellerProducts();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.loadSellerProducts = loadSellerProducts;
+window.showSellerAddForm = showSellerAddForm;
+window.sellerEditProduct = sellerEditProduct;
+window.hideSellerForm = hideSellerForm;
+window.submitSellerProduct = submitSellerProduct;
+window.sellerDeleteProduct = sellerDeleteProduct;
+
+// Admin Orders
+async function showAdminOrders() {
+  const mainContent = document.querySelector('.main-content');
+  if (!mainContent) return;
+
+  mainContent.innerHTML = '<h2>Orders</h2><p>Loading...</p>';
+
+  try {
+    const response = await fetch('UI/orders_get_all.php');
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      if (result.orders.length === 0) {
+        mainContent.innerHTML = '<h2>Orders</h2><p>No orders found.</p>';
+        return;
+      }
+
+      const statusClass = (status) => {
+        if (status === 'completed') return 'background:#e8f7ee;color:#27ae60;';
+        if (status === 'pending') return 'background:#ffeaea;color:#e74c3c;';
+        if (status === 'active') return 'background:#fff4e6;color:#f39c12;';
+        return '';
+      };
+
+      const rows = result.orders.map(o => `
+        <tr>
+          <td>#${o.id}</td>
+          <td>${o.userName}</td>
+          <td>${o.userEmail}</td>
+          <td><span style="padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;${statusClass(o.status)}">${o.status}</span></td>
+          <td>${o.date}</td>
+          <td><button onclick="viewOrderDetails(${o.id})" style="background:#6c63ff;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">View Details</button></td>
+        </tr>
+      `).join('');
+
+      mainContent.innerHTML = `
+        <h2>Orders</h2>
+        <table>
+          <thead>
+            <tr><th>Order ID</th><th>User</th><th>Email</th><th>Status</th><th>Date</th><th>Action</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div id="orderDetailsSection"></div>
+      `;
+    } else {
+      mainContent.innerHTML = '<h2>Orders</h2><p>Failed to load orders.</p>';
+    }
+  } catch (e) {
+    mainContent.innerHTML = '<h2>Orders</h2><p>Error connecting to server.</p>';
+  }
+}
+
+async function viewOrderDetails(orderId) {
+  const detailsSection = document.getElementById('orderDetailsSection');
+  if (!detailsSection) return;
+
+  detailsSection.innerHTML = '<p style="padding:20px;">Loading order items...</p>';
+
+  try {
+    const response = await fetch('UI/orders_get_items.php?orderId=' + orderId);
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      if (result.items.length === 0) {
+        detailsSection.innerHTML = '<p style="padding:20px;">No items in this order.</p>';
+        return;
+      }
+
+      let total = 0;
+      const rows = result.items.map(item => {
+        const price = parseFloat(item.price);
+        total += price;
+        return `
+          <tr>
+            <td><img src="${item.image || ''}" style="width:30px;height:30px;object-fit:contain;"> ${item.name}</td>
+            <td>R${price.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      detailsSection.innerHTML = `
+        <div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:4px;background:#fafafa;">
+          <h3 style="margin-bottom:10px;">Order #${orderId} - Items</h3>
+          <table>
+            <thead><tr><th>Product</th><th>Price</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <p style="text-align:right;margin-top:10px;font-weight:bold;font-size:16px;">Total: R${total.toFixed(2)}</p>
+        </div>
+      `;
+    } else {
+      detailsSection.innerHTML = '<p style="padding:20px;">Error loading order details.</p>';
+    }
+  } catch (e) {
+    detailsSection.innerHTML = '<p style="padding:20px;">Error connecting to server.</p>';
+  }
+}
+
+window.showAdminOrders = showAdminOrders;
+window.viewOrderDetails = viewOrderDetails;
