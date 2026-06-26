@@ -807,7 +807,7 @@ async function showAdminCategories() {
 
     if (result.success) {
       const rows = result.categories.map(c => `
-        <tr style="${c.isDeleted == 1 ? 'opacity:0.5;' : ''}">
+        <tr>
           <td>${c.id}</td>
           <td><i class="fas fa-${c.icon || 'tag'}" style="font-size:24px;color:#6c63ff;"></i></td>
           <td>${c.categoryName}</td>
@@ -1293,4 +1293,28 @@ async function adminChangeRole(userId, roleId) {
   }
 }
 
+
 window.adminChangeRole = adminChangeRole;
+
+async function adminRestoreCategory(categoryId) {
+  try {
+    const response = await fetch('UI/admin_restore_category.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId })
+    });
+    const rawText = await response.text();
+    const result = JSON.parse(rawText.replace(/^\uFEFF/, ''));
+
+    if (result.success) {
+      alert('Category restored.');
+      showAdminCategories();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (e) {
+    alert('Error connecting to server.');
+  }
+}
+
+window.adminRestoreCategory = adminRestoreCategory;
