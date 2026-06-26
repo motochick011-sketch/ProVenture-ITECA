@@ -3,7 +3,7 @@ ob_start();
 $pdo = require_once __DIR__ . '/../SQL/db_connect.php';
 
 try {
-  $sql_file_path = __DIR__ . '/../SQL/queries/getProducts.sql';
+  $sql_file_path = __DIR__ . '/../SQL/queries/product/getProducts.sql';
     if (!file_exists($sql_file_path)) {
         throw new Exception('SQL file not found: ' . $sql_file_path);
     }

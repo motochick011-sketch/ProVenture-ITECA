@@ -3,255 +3,224 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seller Dashboard</title>
-
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>Seller Dashboard - Pro-Venture</title>
 
   <style>
     *{
       margin:0;
       padding:0;
       box-sizing:border-box;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family:Arial, sans-serif;
     }
 
     body{
-      background:#f4f4f4;
+      background:#f5f5f5;
       padding:20px;
-    }
-
-    h2{
-      margin-bottom:10px;
     }
 
     .container{
-      display:flex;
-      border:1px solid #8b8bcb;
-      background:#fff;
-      min-height:500px;
-    }
-
-    /* Sidebar */
-    .sidebar{
-      width:220px;
-      background:linear-gradient(to bottom,#16243a,#0f1725);
-      color:white;
-      padding:20px 0;
-    }
-
-    .logo{
-      text-align:center;
-      font-weight:bold;
-      margin-bottom:30px;
-    }
-
-    .sidebar ul{
-      list-style:none;
-    }
-
-    .sidebar ul li{
-      padding:12px 20px;
-      cursor:pointer;
-      transition:0.3s;
-    }
-
-    .sidebar ul li:hover{
-      background:rgba(255,255,255,0.1);
-    }
-
-    .sidebar ul li i{
-      margin-right:10px;
-    }
-
-    /* Main Content */
-    .main{
-      flex:1;
-      padding:20px;
-    }
-
-    .main h3{
-      margin-bottom:20px;
-      color:#333;
-    }
-
-    /* Cards */
-    .cards{
-      display:flex;
-      gap:15px;
-      margin-bottom:30px;
-    }
-
-    .card{
-      flex:1;
-      color:white;
-      padding:15px;
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      border:1px solid #ccc;
+      padding:25px;
       border-radius:4px;
     }
 
-    .card h1{
-      font-size:28px;
-      margin-bottom:10px;
+    .seller-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:25px;
+      padding-bottom:15px;
+      border-bottom:1px solid #eee;
     }
 
-    .card p{
+    .seller-header h2{
+      color:#333;
+    }
+
+    .nav-links a{
+      text-decoration:none;
+      margin-left:15px;
+      color:#333;
       font-size:14px;
     }
 
-    .blue{
-      background:#2f80ed;
+    .btn{
+      padding:10px 20px;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-weight:bold;
+      font-size:13px;
     }
 
-    .green{
-      background:#3cb54a;
+    .btn-primary{
+      background:#6c63ff;
+      color:white;
     }
 
-    .orange{
+    .btn-danger{
+      background:#e74c3c;
+      color:white;
+    }
+
+    .btn-warning{
       background:#f39c12;
+      color:white;
     }
 
-    .red{
-      background:#e25563;
-    }
-
-    /* Table */
-    .section-title{
-      margin-bottom:15px;
-      font-size:18px;
-      color:#333;
+    .btn-back{
+      background:#6c63ff;
+      color:white;
+      margin-bottom:20px;
     }
 
     table{
       width:100%;
       border-collapse:collapse;
-      background:white;
+      margin-top:15px;
     }
 
     th{
       text-align:left;
       padding:12px;
-      background:#f5f5f5;
-      color:#555;
+      background:#fafafa;
       border-bottom:1px solid #ddd;
+      color:#555;
+      font-size:13px;
     }
 
     td{
       padding:12px;
       border-bottom:1px solid #eee;
+      font-size:14px;
+      vertical-align:middle;
     }
 
-    .product-img{
-      width:35px;
-      height:35px;
-      object-fit:cover;
+    td img{
+      width:40px;
+      height:40px;
+      object-fit:contain;
+      vertical-align:middle;
+      margin-right:8px;
     }
 
-    .active{
-      color:green;
-      font-weight:bold;
+    .actions button{
+      margin-right:5px;
     }
 
-    .sold{
-      color:#666;
-      font-weight:bold;
+    /* Add/Edit Form */
+    .product-form{
+      display:none;
+      background:#f9f9f9;
+      padding:20px;
+      border:1px solid #ddd;
+      border-radius:4px;
+      margin-bottom:20px;
     }
 
-    .action{
-      color:#6c63ff;
-      font-weight:bold;
-      cursor:pointer;
+    .product-form.visible{
+      display:block;
+    }
+
+    .product-form h3{
+      margin-bottom:15px;
+    }
+
+    .form-group{
+      margin-bottom:12px;
+    }
+
+    .form-group label{
+      display:block;
+      font-size:13px;
+      margin-bottom:5px;
+      color:#444;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+      width:100%;
+      padding:8px;
+      border:1px solid #ddd;
+      border-radius:3px;
+    }
+
+    .form-actions{
+      margin-top:15px;
+      display:flex;
+      gap:10px;
     }
   </style>
 </head>
 <body>
 
-<h2>Seller Dashboard (Customer as Seller)</h2>
-
 <div class="container">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="logo">Pro-Venture</div>
-
-    <ul>
-      <li><i class="fa-solid fa-gauge"></i> Dashboard</li>
-      <li><i class="fa-solid fa-box"></i> My Products</li>
-      <li><i class="fa-solid fa-plus"></i> Add New Product</li>
-      <li><i class="fa-solid fa-cart-shopping"></i> Orders</li>
-      <li><i class="fa-solid fa-envelope"></i> Messages</li>
-      <li><i class="fa-solid fa-user"></i> Profile</li>
-      <li><i class="fa-solid fa-right-from-bracket"></i> Logout</li>
-    </ul>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main">
-
-    <h3>Dashboard</h3>
-
-    <div class="cards">
-      <div class="card blue">
-        <h1>12</h1>
-        <p>My Products</p>
-      </div>
-
-      <div class="card green">
-        <h1>5</h1>
-        <p>Active Listings</p>
-      </div>
-
-      <div class="card orange">
-        <h1>8</h1>
-        <p>Sold Items</p>
-      </div>
-
-      <div class="card red">
-        <h1>4</h1>
-        <p>Orders</p>
-      </div>
+  <div class="seller-header">
+    <h2>My Products</h2>
+    <div class="nav-links">
+      <a href="#" onclick="navigateTo('main_screen')">Home</a>
+      <a href="#" onclick="navigateTo('product_listings_screen')">Shop</a>
     </div>
-
-    <h4 class="section-title">My Products</h4>
-
-    <table>
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>User</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-      </tr>
-      </thead>
-
-      <tbody>
-      <tr>
-        <td>1</td>
-        <td>iPhone 12 64GB</td>
-        <td>RM1,699.00</td>
-        <td class="active">Active</td>
-        <td class="action">Edit</td>
-      </tr>
-
-      <tr>
-        <td>2</td>
-        <td>Canon EOS 200D</td>
-        <td>RM1,250.00</td>
-        <td class="sold">Sold</td>
-        <td class="action">View</td>
-      </tr>
-
-      <tr>
-        <td>3</td>
-        <td>Gaming Chair</td>
-        <td>RM450.00</td>
-        <td class="active">Active</td>
-        <td class="action">Edit</td>
-      </tr>
-      </tbody>
-    </table>
-
   </div>
+
+  <button class="btn btn-primary" onclick="showSellerAddForm()">+ Add New Product</button>
+
+  <div class="product-form" id="sellerProductForm">
+    <h3 id="formTitle">Add Product</h3>
+    <input type="hidden" id="editProductId" value="">
+    <div class="form-group">
+      <label>Product Name</label>
+      <input type="text" id="spName" placeholder="Enter product name">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="spDescription" rows="3" placeholder="Enter description"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Price (R)</label>
+      <input type="number" id="spPrice" placeholder="0.00" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="spCategory">
+        <option value="1">Electronics</option>
+        <option value="2">Fashion</option>
+        <option value="3">Home & Living</option>
+        <option value="4">Books</option>
+        <option value="5">Sports</option>
+        <option value="6">Vehicles</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Image URL</label>
+      <input type="text" id="spImage" placeholder="https://...">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="submitSellerProduct()">Save</button>
+      <button class="btn btn-warning" onclick="hideSellerForm()">Cancel</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="sellerProductsBody">
+      <tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>
+    </tbody>
+  </table>
+
 </div>
 
 </body>
